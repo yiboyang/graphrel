@@ -1,5 +1,6 @@
 // set up SVG for D3
-var width  = 960,
+// affects resizing of the iframe in the main Graphrel page
+var width  = 500,
     height = 500,
     colors = d3.scale.category10();
 
