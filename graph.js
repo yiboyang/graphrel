@@ -1,8 +1,8 @@
 // set up SVG for D3
-// affects resizing of the iframe in the main Graphrel page
+// size affects iframe resizing in the main app page
 var width  = 500,
     height = 500,
-    colors = d3.scale.category10();
+    colors = d3.scale.category20();
 
 var svg = d3.select('body')
   .append('svg')
@@ -30,8 +30,8 @@ var force = d3.layout.force()
     .nodes(nodes)
     .links(links)
     .size([width, height])
-    .linkDistance(150)
-    .charge(-500)
+    .linkDistance(120)
+    .charge(-400)
     .on('tick', tick)
 
 // define arrow markers for graph links

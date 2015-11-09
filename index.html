@@ -11,7 +11,7 @@
 <body>
 
 <div id="header">
-    <h2>Graphrel--relation-based WYSIWYG graph editor</h2>
+    <h2>Graphrel—A simple relation-based WYSIWYG graph editor</h2>
     <p>under construction; check back later...</p>
 </div>
 
@@ -23,38 +23,38 @@
 
 <div id="layout" style="width: 100%; height: 500px;"></div>
 
-<div id="footer" style="height: 10px;"></div>
+<div id="footer" style="height: 10px;"><p>awesome footer</p></div>
 
 
 
 <script type="text/javascript">
-/* Going with minimal design here. Currently only support main editor (main), JSON style graph builder (right), Adjacency matrix (right) */
+/* Going with minimalist design here. Currently only support main editor (main), JSON style graph builder (right), Adjacency matrix (right) */
 $(function () {
     var pstyle = 'border: 1px solid #dfdfdf; padding: 5px;';
     $('#layout').w2layout({
         name: 'layout',
         padding: 4,
         panels: [
-            { type: 'top', size: 80, resizable: true, style: pstyle, content: '<div><ol><li>Click in the open space to add a node, drag from one node to another to add an edge. Ctrl-drag a node to move the graph layout. Click a node or an edge to select it.</li><li>When a node is selected: R toggles reflexivity, Delete removes the node. When an edge is selected: L(eft), R(ight), B(oth) change direction, Delete removes the edge.</li><li>Edit the JSON structure and/or adjacency matrix to see real-time updates</li></ol></div>' },
-            <!-- for some reason main iframe gets cropped if resized to less than 500, which is roughly the svg width... currently put a hard limit on minSize -->
-            { type: 'main', minSize: 450, resizable: true, style: pstyle, content: "<div style='width: 100%; height: 100%'><iframe marginwidth='0' xmarginheight='0' scrolling='no' src='app.html'></iframe></div>" },
-            { type: 'right', size: 600, resizable: true, style: pstyle, content: 'right' },
-            
-
-
+            { type: 'top', size: 70, style: pstyle, content: '<div id="instructions"><ul><li>Click in the open space to add a node, drag from one node to another to add an edge. Ctrl-drag a node to move the graph layout. Click a node or an edge to select it.</li><li>When a node is selected: R toggles reflexivity (loop), Delete removes the node. When an edge is selected: L(eft), R(ight), B(oth) change direction, Delete removes the edge.</li><li>Edit the adjacency list to see real-time updates. More features coming soon!</li></ul></div>' },
+            <!-- for some reason main iframe gets cropped if resized to roughly less than the svg width... currently put a hard limit on minSize -->
+            { type: 'main', minSize: 480, resizable: true, style: pstyle, content: "<div style='width: 100%; height: 100%'><iframe id='editg' sandbox='allow-scripts allow-forms allow-same-origin' marginwidth='0' xmarginheight='0' frameborder='0' scrolling='no' src='graph.html'></iframe></div>" },
+            { type: 'right', minSize: 420, size: 600, resizable: true, style: pstyle, content: "<div style='width: 100%; height: 100%'><iframe id='editr' sandbox='allow-scripts allow-forms allow-same-origin' marginwidth='0' xmarginheight='0' frameborder='0' src='adjlist.html'></iframe></div>" },
         ]
     });
 
+    /*
     var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
     $().w2layout({
         name: 'layout2',
         panels: [
+            { type: 'top', size: '50%', resizable: true, style: pstyle, content: 'Adjacency List' },
             { type: 'main', style: pstyle, content: 'Relation in JSON' },
             { type: 'preview', size: '50%', resizable: true, style: pstyle, content: 'Adjacency Matrix' },
         ]
     });
     
     w2ui['layout'].content('right', w2ui['layout2']);
+    */
 
 });
 </script>
