@@ -9,6 +9,22 @@ var svg = d3.select('body')
   .attr('oncontextmenu', 'return false;')
   .attr('width', width)
   .attr('height', height);
+/*
+        .append("svg:g")
+            .call(d3.behavior.zoom().on("zoom", rescale))
+        .append("g");/*
+.call(d3.behavior.zoom().on("zoom", rescale))
+  .append("g");*/
+
+
+function rescale() {
+    trans = d3.event.translate;
+    scale = d3.event.scale;
+
+    svg.attr("transform",
+        "translate(" + trans + ")"
+        + " scale(" + scale + ")");
+}
 
 // set up initial nodes and links
 //  - nodes are known by 'id', not by index in array.
@@ -380,6 +396,7 @@ function keyup() {
 // return the adjacency list describing current graph relation
 function getAdjlist() {
     var alist = {};
+
     // loop through all links to add to resulting adjacency list
     for (var i = 0; i < links.length; i++) {
         var lnk = links[i];
@@ -394,6 +411,7 @@ function getAdjlist() {
             alist[tgt].push(src);
 
     }
+
     // loop through all nodes to add loops
     for (var j = 0; j < nodes.length; j++) {
         var n = nodes[j];
@@ -417,11 +435,12 @@ function getAdjlist() {
 // handles to the adjacency list editor frame, document, and textarea
 var alFrm = window.parent.window.frames['adjlist'];
 var alDoc = alFrm.contentDocument ? alFrm.contentDocument : alFrm.contentWindow.document;
-var alTxt = alDoc.getElementById('JSONBox');
+var alBox = alDoc.getElementById('alBox');
 // updates the adjacency list frame in the main app upon node/link creation/deletion (including loops)
 function updateAdjlistFrame() {
     var alistr = JSON.stringify(getAdjlist());
-    alTxt.value = alistr.replace(/["'{}]/g, "");
+    alBox.value = alistr.replace(/["'{}]/g, "");
+    alBox.className = 'valid';
 }
 
 
