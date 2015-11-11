@@ -2,13 +2,19 @@
 // size affects iframe resizing in the main app page
 var width = 500,
     height = 500,
+    aspect = width / height,
+    linkDistance = 100,
     colors = d3.scale.category20();
 
 var svg = d3.select('body')
-  .append('svg')
-  .attr('oncontextmenu', 'return false;')
-  .attr('width', width)
-  .attr('height', height);
+    .append('svg')
+    .attr('oncontextmenu', 'return false;')
+    .attr('width', width)
+    .attr('height', height)
+    .attr('id', 'mainSvg');
+    /*
+    .attr('viewBox', '0 0'+width+' '+hight)
+    .attr('perserveAspectRatio', 'xMinYMid');
 /*
         .append("svg:g")
             .call(d3.behavior.zoom().on("zoom", rescale))
@@ -30,15 +36,16 @@ function rescale() {
 //  - nodes are known by 'id', not by index in array.
 //  - reflexive edges are indicated on the node (as a bold black circle).
 //  - links are always source < target; edge directions are set by 'left' and 'right'.
+// specify initial positions of nodes to avoid random (by default) behavior at beginning
 var nodes = [
-    { id: 0, reflexive: false },
-    { id: 1, reflexive: true },
-    { id: 2, reflexive: false }
+    { id: 0, reflexive: false, x: width / 2 - 50, y: height / 2 - 50 },
+    { id: 1, reflexive: true, x: width / 2 - 50, y: height / 2 + 50 },
+    { id: 2, reflexive: false, x: width / 2 + 50, y: height / 2 - 50}
 ],
   lastNodeId = 2,
   links = [
     { source: nodes[0], target: nodes[1], left: false, right: true },
-    { source: nodes[1], target: nodes[2], left: false, right: true }
+    { source: nodes[1], target: nodes[2], left: true, right: true }
   ];
 
 // init D3 force layout
@@ -46,7 +53,7 @@ var force = d3.layout.force()
     .nodes(nodes)
     .links(links)
     .size([width, height])
-    .linkDistance(120)
+    .linkDistance(linkDistance)
     .charge(-400)
     .on('tick', tick)
 
@@ -116,6 +123,17 @@ function tick() {
 
     // move all the circles to current positions by updating the transform attributes in svg container
     circle.attr('transform', function (d) {
+        // update position against border
+        // get the panel element in w2ui and obtain its size to use as boundary for svg viewpoint
+        // 15, 25, and 35 are border offsets from trial and error (note that 12 is the hardcoded circle radius)
+        // need to use parseInt as pixel values (e.g. '234px') are returned
+        if (mp = window.parent.mainPanel)
+        {
+            var mpsize = window.parent.getMainPanelSize();
+            d.x = Math.max(15, Math.min(parseInt(mpsize[0],10) - 25, d.x));
+            d.y = Math.max(15, Math.min(parseInt(mpsize[1],10) - 35, d.y));
+        }
+        // as per usual
         return 'translate(' + d.x + ',' + d.y + ')';
     });
 }
