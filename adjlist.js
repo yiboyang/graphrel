@@ -25,8 +25,7 @@ var alRegex = /^(\d{1,2}:(\[(\d{1,2}(,\d{1,2})*)?\],?))+$/
 var albox = document.getElementById('alBox');
 
 albox.addEventListener('keyup', function () {
-    var test = alRegex.test(albox.value);
-    if (test)
+    if (alRegex.test(albox.value))
         albox.className = "valid";
     else {
         albox.className = "invalid";
