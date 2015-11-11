@@ -24,10 +24,14 @@ var alRegex = /^(\d{1,2}:(\[(\d{1,2}(,\d{1,2})*)?\],?))+$/
 // handle to user input textarea box
 var albox = document.getElementById('alBox');
 
-albox.addEventListener('keyup', function () {
+function validate()
+{
     if (alRegex.test(albox.value))
         albox.className = "valid";
-    else {
+    else
         albox.className = "invalid";
-    }
-});
+}
+
+albox.addEventListener('keyup', validate);
+albox.addEventListener('change', validate); // needed to catch context menu pasting event
+
