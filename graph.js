@@ -107,8 +107,10 @@ function tick() {
     // move all the circles to current positions by updating the transform attributes in svg container
     circle.attr('transform', function (d) {
         // update position against border
-        d.x = Math.max(15, Math.min(xbound - 25, d.x));
-        d.y = Math.max(15, Math.min(ybound - 25, d.y));
+        if (xbound && ybound) {
+            d.x = Math.max(15, Math.min(xbound - 25, d.x));
+            d.y = Math.max(15, Math.min(ybound - 25, d.y));
+        }
 
         return 'translate(' + d.x + ',' + d.y + ')';
     });
@@ -428,7 +430,7 @@ function getAdjlist() {
 
 // handles to the adjacency list editor frame, document, and textarea
 var alBox;
-// updates the adjacency list frame in the main app upon node/link creation/deletion (including loops)
+// updates the adjacency list frame in the main app upon node/link (loop too) creation/deletion
 function updateAdjlistFrame() {
     var alistr = JSON.stringify(getAdjlist());
     alBox.value = alistr.replace(/["'{}]/g, "");

@@ -50,7 +50,7 @@
         // this is needed before the graph iframe loads and renders using the x/ybounds
         $('graph').ready(function () {
             mainPanel = document.getElementById('layout_layout_panel_main');
-            graphWin = window.frames['graph'].contentWindow;
+            graphWin = document.getElementById('graph').contentWindow;
             // dynamically reset force layout bounds on resize event completion
             w2ui['layout'].on('resize', function (event) {
                 event.onComplete = function () {
@@ -63,7 +63,7 @@
         // initialize textarea window
         // this should wait AFTER the adjacency list iframe finishes loading
         window.onload = function () {
-            adjWin = window.frames['adjlist'].contentWindow;
+            adjWin = document.getElementById('adjlist').contentWindow;
             adjWin.init();
             graphWin.alBox = adjWin.document.getElementById('alBox');
             graphWin.updateAdjlistFrame();
