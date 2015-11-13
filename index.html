@@ -31,8 +31,6 @@
 
     <div id="footer" style="position: absolute; bottom: 10px; left: 10px; right: 10px;"><p>awesome footer</p></div>
 
-
-
     <script type="text/javascript">
         /* Going with minimalist design here. Currently only support main editor (main), and adjacency list viewer/editor */
         $(function () {
@@ -41,39 +39,38 @@
                 name: 'layout',
                 padding: 4,
                 panels: [
-                    { type: 'top', size: 70, style: pstyle, content: '<div id="instructions"><ul><li>Click in the open space to add a node, drag from one node to another to add an edge. Ctrl-drag a node to move the graph layout. Click a node or an edge to select it.</li><li>When a node is selected: R toggles reflexivity (loop), Delete removes the node. When an edge is selected: L(eft), R(ight), B(oth) change direction, Delete removes the edge.</li><li>Edit the adjacency list to see real-time updates. More features coming soon!</li></ul></div>' },
+                    { type: 'top', style: pstyle, content: '<div id="instructions"><ul><li>Click in the open space to add a node, drag from one node to another to add an edge. Ctrl-drag a node to move the graph layout. Click a node or an edge to select it.</li><li>When a node is selected: R toggles reflexivity (loop), Delete removes the node. When an edge is selected: L(eft), R(ight), B(oth) change direction, Delete removes the edge.</li><li>Edit the adjacency list to see real-time updates. More features coming soon!</li></ul></div>' },
                     /* for some reason main iframe gets cropped if resized to roughly less than the svg width... currently put a hard limit on minSize */
-                    { type: 'main', minSize: 480, resizable: true, style: pstyle, content: "<div id='graphContainer' style='width: 100%; height: 100%;'><iframe id='graph' scrolling='no' sandbox='allow-scripts allow-forms allow-same-origin' marginwidth='0' xmarginheight='0' frameborder='0' src='graph.html'></iframe></div>" },
-                    { type: 'right', minSize: 400, size: 000, resizable: true, style: pstyle, content: "<div style='width: 100%; height: 100%'><iframe id='adjlist' sandbox='allow-scripts allow-forms allow-same-origin' marginwidth='0' xmarginheight='0' frameborder='0' src='adjlist.html'></iframe></div>" },
+                    { type: 'main', minSize: 480, resizable: true, style: pstyle, content: "<div id='graphContainer' style='width: 100%; height: 100%;'><iframe id='graph' scrolling='no' sandbox='allow-scripts allow-forms allow-same-origin' marginwidth='0' marginheight='0' frameborder='0' src='graph.html'></iframe></div>" },
+                    { type: 'right', minSize: 200, size: '30%', resizable: true, style: pstyle, content: "<div style='width: 100%; height: 100%'><iframe id='adjlist' sandbox='allow-scripts allow-forms allow-same-origin' marginwidth='0' xmarginheight='0' frameborder='0' src='adjlist.html'></iframe></div>" },
                 ]
             });
-
-            /*
-            var pstyle = 'background-color: #F0F0C1; border: 1px solid #dfdfdf; padding: 5px;';
-            $().w2layout({
-                name: 'layout2',
-                panels: [
-                    { type: 'top', size: '50%', resizable: true, style: pstyle, content: 'Adjacency List' },
-                    { type: 'main', style: pstyle, content: 'Relation in JSON' },
-                    { type: 'preview', size: '50%', resizable: true, style: pstyle, content: 'Adjacency Matrix' },
-                ]
-            });
-
-            w2ui['layout'].content('right', w2ui['layout2']);
-            */
-
         });
 
-        // hack to help with boundary checking (note we're defining it for the window scope instead of locally)
-        $(document).ready(function () {
+        // this is needed before the graph iframe loads and renders using the x/ybounds
+        $('graph').ready(function () {
             mainPanel = document.getElementById('layout_layout_panel_main');
-            getMainPanelSize = function () {
-                return [mainPanel.style.width, mainPanel.style.height];
-            };
-        });
+            graphWin = window.frames['graph'].contentWindow;
+            // dynamically reset force layout bounds on resize event completion
+            w2ui['layout'].on('resize', function (event) {
+                event.onComplete = function () {
+                    graphWin.xbound = parseInt(mainPanel.style.width, 10);
+                    graphWin.ybound = parseInt(mainPanel.style.height, 10);
+                }
+            });
+        })
 
+        // initialize textarea window
+        // this should wait AFTER the adjacency list iframe finishes loading
+        window.onload = function () {
+            adjWin = window.frames['adjlist'].contentWindow;
+            adjWin.init();
+            graphWin.alBox = adjWin.document.getElementById('alBox');
+            graphWin.updateAdjlistFrame();
+        };
 
     </script>
+
 
 </body>
 </html>

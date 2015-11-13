@@ -8,10 +8,12 @@ body {
 /* This is our style for the adjacency list form */
 #alBox {
     width: 100%;
-    border: 1px solid /*#333*/ green;
+    border: 1px solid green;
     margin: 0;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
+    overflow: hidden;
+    resize: none;
 }
 
 
@@ -21,4 +23,3 @@ body {
     outline: none;
     /*background-color: #FDD;*/
 }
-

@@ -4,6 +4,8 @@ var width = 500,
     height = 500,
     aspect = width / height,
     linkDistance = 100,
+    xbound, // these bounds will be dynamically set by main page
+    ybound,
     colors = d3.scale.category20();
 
 var svg = d3.select('body')
@@ -12,25 +14,7 @@ var svg = d3.select('body')
     .attr('width', width)
     .attr('height', height)
     .attr('id', 'mainSvg');
-    /*
-    .attr('viewBox', '0 0'+width+' '+hight)
-    .attr('perserveAspectRatio', 'xMinYMid');
-/*
-        .append("svg:g")
-            .call(d3.behavior.zoom().on("zoom", rescale))
-        .append("g");/*
-.call(d3.behavior.zoom().on("zoom", rescale))
-  .append("g");*/
 
-
-function rescale() {
-    trans = d3.event.translate;
-    scale = d3.event.scale;
-
-    svg.attr("transform",
-        "translate(" + trans + ")"
-        + " scale(" + scale + ")");
-}
 
 // set up initial nodes and links
 //  - nodes are known by 'id', not by index in array.
@@ -38,9 +22,9 @@ function rescale() {
 //  - links are always source < target; edge directions are set by 'left' and 'right'.
 // specify initial positions of nodes to avoid random (by default) behavior at beginning
 var nodes = [
-    { id: 0, reflexive: false, x: width / 2 - 50, y: height / 2 - 50 },
-    { id: 1, reflexive: true, x: width / 2 - 50, y: height / 2 + 50 },
-    { id: 2, reflexive: false, x: width / 2 + 50, y: height / 2 - 50}
+    { id: 0, reflexive: false, x: 50, y: 100 },
+    { id: 1, reflexive: true, x: 100, y: 50 },
+    { id: 2, reflexive: false, x: 100, y: 100}
 ],
   lastNodeId = 2,
   links = [
@@ -105,7 +89,6 @@ function resetMouseVars() {
 // update force layout (called automatically each iteration), animation callback
 function tick() {
     // draw directed edges with proper padding from node centers
-    // 'd' is the svg path attribute, a string which contains a series of path descriptions (https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d)
     path.attr('d', function (d) {
         var deltaX = d.target.x - d.source.x,
             deltaY = d.target.y - d.source.y,
@@ -124,16 +107,9 @@ function tick() {
     // move all the circles to current positions by updating the transform attributes in svg container
     circle.attr('transform', function (d) {
         // update position against border
-        // get the panel element in w2ui and obtain its size to use as boundary for svg viewpoint
-        // 15, 25, and 35 are border offsets from trial and error (note that 12 is the hardcoded circle radius)
-        // need to use parseInt as pixel values (e.g. '234px') are returned
-        if (mp = window.parent.mainPanel)
-        {
-            var mpsize = window.parent.getMainPanelSize();
-            d.x = Math.max(15, Math.min(parseInt(mpsize[0],10) - 25, d.x));
-            d.y = Math.max(15, Math.min(parseInt(mpsize[1],10) - 35, d.y));
-        }
-        // as per usual
+        d.x = Math.max(15, Math.min(xbound - 25, d.x));
+        d.y = Math.max(15, Math.min(ybound - 25, d.y));
+
         return 'translate(' + d.x + ',' + d.y + ')';
     });
 }
@@ -451,9 +427,7 @@ function getAdjlist() {
 
 
 // handles to the adjacency list editor frame, document, and textarea
-var alFrm = window.parent.window.frames['adjlist'];
-var alDoc = alFrm.contentDocument ? alFrm.contentDocument : alFrm.contentWindow.document;
-var alBox = alDoc.getElementById('alBox');
+var alBox;
 // updates the adjacency list frame in the main app upon node/link creation/deletion (including loops)
 function updateAdjlistFrame() {
     var alistr = JSON.stringify(getAdjlist());
@@ -469,5 +443,4 @@ svg.on('mousedown', mousedown)
 d3.select(window)
   .on('keydown', keydown)
   .on('keyup', keyup);
-updateAdjlistFrame();
 restart();
