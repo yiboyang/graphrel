@@ -62,11 +62,18 @@
 
         // initialize textarea window
         // this should wait AFTER the adjacency list iframe finishes loading
+        // the setTimeout hack makes sure the necessary script is executed (IE only issue)
         window.onload = function () {
             adjWin = document.getElementById('adjlist').contentWindow;
-            adjWin.init();
-            graphWin.alBox = adjWin.document.getElementById('alBox');
-            graphWin.updateAdjlistFrame();
+            (function deferInit() {
+                if (adjWin.init) {
+                    adjWin.init();
+                    graphWin.alBox = adjWin.document.getElementById('alBox');
+                    graphWin.updateAdjlistFrame();
+                }
+                else
+                    setTimeout(function () { deferInit() }, 50);
+            })();
         };
 
     </script>
