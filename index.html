@@ -61,9 +61,9 @@
         })
 
         // initialize textarea window
-        // this should wait AFTER the adjacency list iframe finishes loading
+        // this should wait AFTER the adjacency list iframe is ready
         // the setTimeout hack makes sure the necessary script is executed (IE only issue)
-        window.onload = function () {
+        $('adjlist').ready(function () {
             adjWin = document.getElementById('adjlist').contentWindow;
             (function deferInit() {
                 if (adjWin.init) {
@@ -74,7 +74,7 @@
                 else
                     setTimeout(function () { deferInit() }, 50);
             })();
-        };
+        });
 
     </script>
 

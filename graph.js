@@ -428,13 +428,28 @@ function getAdjlist() {
 
 
 
-// handles to the adjacency list editor frame, document, and textarea
+// handle to the adjacency list editor frame; set in main page once ajdlist frame is ready
 var alBox;
 // updates the adjacency list frame in the main app upon node/link (loop too) creation/deletion
 function updateAdjlistFrame() {
     var alistr = JSON.stringify(getAdjlist());
     alBox.value = alistr.replace(/["'{}]/g, "");
-    alBox.className = 'valid';
+    // update the display of adjacency list (height/border) the cross-browser way
+    if (typeof updateDisplay === "undefined") {
+        if (document.createEvent) {
+            updateDisplay = document.createEvent("HTMLEvents");
+            updateDisplay.initEvent("change", true, true);
+        }
+        else {
+            updateDisplay = document.createEventObject();
+            updateDisplay.eventType = "change";
+        }
+        updateDisplay.eventName = "change";
+    }
+    if (document.createEvent)
+        alBox.dispatchEvent(updateDisplay);
+    else
+        alBox.fireEvent("on" + updateDisplay.eventType, updateDisplay);
 }
 
 

@@ -42,7 +42,7 @@ else {
 }
 
 function init() {
-    var text = document.getElementById('alBox');
+    text = document.getElementById('alBox');
     // hack to auto adjust textarea height
     function resize() {
         text.style.height = 'auto';
