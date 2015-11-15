@@ -22,10 +22,30 @@ giving us a list of comma separated numbers
 var reg = /^(\d{1,2}:(\[(\d{1,2}(,\d{1,2})*)?\],?))+$/
 
 function validate() {
-    if (reg.test(this.value))
-        this.className = "valid";
-    else
+    if (!reg.test(this.value))
         this.className = "invalid";
+    else {
+        try {
+            var obj = eval("({" + this.value + "})"); // use the evil eval b/c JSON.parse fails on '0'
+        } catch(e) {
+            this.className = "invalid";
+            console.log('exp');
+            return;
+        }
+
+        for (var src in obj) {
+            for (var i = 0; i < obj[src].length; i++) {
+                if (!(obj[src][i] in obj)) { // if target node does not appear in the collection of nodes
+                    this.className = "invalid";
+                    return;
+                }
+            }
+        }
+
+        this.className = "valid";
+        window.parent.graphWin.createFromList(obj);
+    }
+    console.log(this.className);
 }
 
 
@@ -34,8 +54,7 @@ if (window.attachEvent) {
     observe = function (element, event, handler) {
         element.attachEvent('on' + event, handler);
     };
-}
-else {
+} else {
     observe = function (element, event, handler) {
         element.addEventListener(event, handler, false);
     };

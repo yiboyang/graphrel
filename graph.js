@@ -237,7 +237,7 @@ function restart() {
               links.push(link);
           }
 
-          // select new link
+          // select new link after creation for convenient editing
           selected_link = link;
           selected_node = null;
           updateAdjlistFrame();
@@ -435,21 +435,119 @@ function updateAdjlistFrame() {
     var alistr = JSON.stringify(getAdjlist());
     alBox.value = alistr.replace(/["'{}]/g, "");
     // update the display of adjacency list (height/border) the cross-browser way
+    // manually trigger the cut event of textarea for auto adjusting height; no need to validate
     if (typeof updateDisplay === "undefined") {
         if (document.createEvent) {
             updateDisplay = document.createEvent("HTMLEvents");
-            updateDisplay.initEvent("change", true, true);
+            updateDisplay.initEvent("cut", true, true);
         }
         else {
             updateDisplay = document.createEventObject();
-            updateDisplay.eventType = "change";
+            updateDisplay.eventType = "cut";
         }
-        updateDisplay.eventName = "change";
+        updateDisplay.eventName = "cut";
     }
     if (document.createEvent)
         alBox.dispatchEvent(updateDisplay);
     else
         alBox.fireEvent("on" + updateDisplay.eventType, updateDisplay);
+    alBox.className = 'valid';
+}
+
+// creates/updates the graph from a given (valid) 'list' object
+// called when the adjacency list changes
+function createFromList(obj) {
+    // create shallow copy containers to hold nodes/links that need to be removed
+    var nodesToGo = nodes.slice();
+    var linksToGo = links.slice();
+    var loopNodesToGo = []; // treat (self-directed) links separately
+    
+    for (var n=0; n<nodes.length; n++) {
+        if (nodes[n].reflexive)
+            loopNodesToGo.push(nodes[n])
+    }
+
+    // add nodes if not present
+    for (var src in obj) {
+        var newNode = true,
+            srcId = parseInt(src, 10);
+        for (var n = 0; n < nodesToGo.length; n++) {
+            if ((srcId == nodesToGo[n].id)) {
+                newNode = false;
+                nodesToGo.splice(nodesToGo.indexOf(nodesToGo[n]), 1);
+                break;
+            }
+        }
+        if (newNode)
+            nodes.push({ id: srcId, reflexive: false });
+    }
+
+    // remove leftover nodes and their associated links
+    nodesToGo.map(function (n) {
+        nodes.splice(nodes.indexOf(n), 1);
+        spliceLinksForNode(n);
+    });
+
+    // now deal with edges/links and loops
+    for (var src in obj) {
+        var srcId = parseInt(src, 10);
+        var srcNode = nodes.filter(function (n) { return n.id == srcId })[0];
+        for (var i = 0; i < obj[src].length; i++) {
+            var tgtId = parseInt(obj[src][i], 10);
+            // if it's a loop
+            if (srcId == tgtId) {
+                if (srcNode.reflexive) // if this link (loop) exists
+                    loopNodesToGo.splice(loopNodesToGo.indexOf(srcNode), 1);
+                else
+                    srcNode.reflexive = true;
+                continue;
+            }
+            // non-loops
+            var direction, source, target, tgtNode = nodes.filter(function (n) { return n.id == tgtId })[0];
+            if (srcId < tgtId) {
+                source = srcNode;
+                target = tgtNode;
+                direction = 'right';
+            } else {
+                source = tgtNode;
+                target = srcNode;
+                direction = 'left';
+            }
+            var link;
+            link = links.filter(function (l) {
+                return (l.source.id == source && l.target.id == target);
+            })[0];
+            // if there's a link between the two
+            if (link) {
+                if (link[direction]) { // if it also has the correct direction
+                    var otherDirection = direction == 'left' ? right : left;
+                    if (link[otherDirection]) // if it's also connected the other direction
+                        link[otherDirection] = false;
+                }
+                else
+                    link[direction] = true; // turn on the desired direction
+                linksToGo.splice(linksToGo.indexOf(link), 1); // preserve this edge
+            } else {
+                link = { source: source, target: target, left: false, right: false };
+                link[direction] = true;
+                links.push(link);
+            }
+
+        }
+    }
+
+    linksToGo.map(function (l) {
+        links.splice(links.indexOf(l), 1);
+    });
+
+    // disable the loops that need removed
+    loopNodesToGo.map(function (n) {
+        n.reflexive = false;
+    });
+
+
+    restart();
+    // updateAdjlistFrame(); // always reflect the exact state of the graph
 }
 
 
