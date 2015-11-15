@@ -29,7 +29,6 @@ function validate() {
             var obj = eval("({" + this.value + "})"); // use the evil eval b/c JSON.parse fails on '0'
         } catch(e) {
             this.className = "invalid";
-            console.log('exp');
             return;
         }
 
@@ -45,7 +44,6 @@ function validate() {
         this.className = "valid";
         window.parent.graphWin.createFromList(obj);
     }
-    console.log(this.className);
 }
 
 

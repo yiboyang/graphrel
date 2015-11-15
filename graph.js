@@ -440,8 +440,7 @@ function updateAdjlistFrame() {
         if (document.createEvent) {
             updateDisplay = document.createEvent("HTMLEvents");
             updateDisplay.initEvent("cut", true, true);
-        }
-        else {
+        } else {
             updateDisplay = document.createEventObject();
             updateDisplay.eventType = "cut";
         }
@@ -462,10 +461,9 @@ function createFromList(obj) {
     var linksToGo = links.slice();
     var loopNodesToGo = []; // treat (self-directed) links separately
     
-    for (var n=0; n<nodes.length; n++) {
+    for (var n=0; n<nodes.length; n++)
         if (nodes[n].reflexive)
             loopNodesToGo.push(nodes[n])
-    }
 
     // add nodes if not present
     for (var src in obj) {
@@ -487,6 +485,10 @@ function createFromList(obj) {
         nodes.splice(nodes.indexOf(n), 1);
         spliceLinksForNode(n);
     });
+
+    // remove link directions; add them in when present
+    for (var l = 0; l < links.length; l++)
+        links[l].left = links[l].right = false;
 
     // now deal with edges/links and loops
     for (var src in obj) {
@@ -513,31 +515,27 @@ function createFromList(obj) {
                 target = srcNode;
                 direction = 'left';
             }
-            var link;
-            link = links.filter(function (l) {
-                return (l.source.id == source && l.target.id == target);
+            var link = links.filter(function (l) {
+                return (l.source === source && l.target === target);
             })[0];
             // if there's a link between the two
             if (link) {
-                if (link[direction]) { // if it also has the correct direction
-                    var otherDirection = direction == 'left' ? right : left;
-                    if (link[otherDirection]) // if it's also connected the other direction
-                        link[otherDirection] = false;
-                }
-                else
-                    link[direction] = true; // turn on the desired direction
-                linksToGo.splice(linksToGo.indexOf(link), 1); // preserve this edge
+                var idxTg = linksToGo.indexOf(link);
+                if (idxTg!=-1)
+                    linksToGo.splice(idxTg, 1); // preserve this edge
             } else {
                 link = { source: source, target: target, left: false, right: false };
-                link[direction] = true;
                 links.push(link);
             }
-
+            link[direction] = true; // enable desired direction
         }
     }
 
+    // remove leftover links not present in the new graph
     linksToGo.map(function (l) {
-        links.splice(links.indexOf(l), 1);
+        var idx = links.indexOf(l);
+        if (idx!=-1) // only remove those that are actually in links
+            links.splice(links.indexOf(l), 1);
     });
 
     // disable the loops that need removed
