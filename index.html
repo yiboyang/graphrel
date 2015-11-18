@@ -56,6 +56,7 @@
                 event.onComplete = function () {
                     graphWin.xbound = parseInt(mainPanel.style.width, 10);
                     graphWin.ybound = parseInt(mainPanel.style.height, 10);
+                    graphWin.force.start();
                 }
             });
         })
