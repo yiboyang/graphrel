@@ -543,11 +543,15 @@ function createFromList(obj) {
         n.reflexive = false;
     });
 
-
     restart();
-    // updateAdjlistFrame(); // always reflect the exact state of the graph
 }
 
+function clear() {
+    createFromList([]);
+    restart();
+    updateAdjlistFrame();
+    lastNodeId = -1;
+}
 
 // app starts here
 svg.on('mousedown', mousedown)
