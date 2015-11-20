@@ -21,9 +21,9 @@
         <p>under construction; check back later...</p>
     </div>
 
-    <div id="control_buttons" style="position:relative;left:3px">
-        <button class="btn" onclick="w2ui['layout'].toggle('top', window.instant)">Instructions</button>
-        <button class="btn" onclick="w2ui['layout'].toggle('right', window.instant)">Relation Editor</button>
+    <div id="control_buttons" style="position:relative">
+        <input type="image" id="howto" title="how to" src="img/howto.png" alt="how to" onclick="w2ui['layout'].toggle('top', window.instant)" />
+        <input type="image" id="edit" title="edit" src="img/edit.png" alt="edit" onclick="w2ui['layout'].toggle('right', window.instant)" />
         <!--<input type="checkbox" id="instant" onclick="window.instant = this.checked;"> <label for="instant">Instant</label>-->
     </div>
 
