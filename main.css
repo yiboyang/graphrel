@@ -21,3 +21,11 @@ iframe {
 #header, #footer {
     text-align: center;
 }
+
+#control_buttons input{
+    border:0;
+}
+
+#control_buttons input:hover{
+   background-color:#DCDCDC;
+}

@@ -21,7 +21,7 @@
         <p>under construction; check back later...</p>
     </div>
 
-    <div id="control_buttons" style="position:relative">
+    <div id="control_buttons" style="position:relative; left:2px" >
         <input type="image" id="howto" title="how to" src="img/howto.png" alt="how to" onclick="w2ui['layout'].toggle('top', window.instant)" />
         <input type="image" id="edit" title="edit" src="img/edit.png" alt="edit" onclick="w2ui['layout'].toggle('right', window.instant)" />
         <!--<input type="checkbox" id="instant" onclick="window.instant = this.checked;"> <label for="instant">Instant</label>-->
@@ -56,7 +56,8 @@
                 event.onComplete = function () {
                     graphWin.xbound = parseInt(mainPanel.style.width, 10);
                     graphWin.ybound = parseInt(mainPanel.style.height, 10);
-                    graphWin.force.start();
+                    if (graphWin.force)
+                        graphWin.force.start();
                 }
             });
         })
