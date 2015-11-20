@@ -492,6 +492,7 @@ function createFromList(obj) {
 
     // now deal with edges/links and loops
     for (var src in obj) {
+        if (src > lastNodeId) lastNodeId = src; // update lastNodeId to the largest in obj
         var srcId = parseInt(src, 10);
         var srcNode = nodes.filter(function (n) { return n.id == srcId })[0];
         for (var i = 0; i < obj[src].length; i++) {
