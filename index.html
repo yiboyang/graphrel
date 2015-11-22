@@ -6,15 +6,11 @@
     <link rel="stylesheet" type="text/css" href="http://w2ui.com/src/w2ui-1.4.2.min.css" />
     <link rel="stylesheet" type="text/css" href="main.css" />
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
-    <script>
-        if (!window.jQuery) { document.write('<script src="lib/jquery.min.js"><\/script>'); }
-    </script>
-    <script type="text/javascript" src="http://w2ui.com/src/w2ui-1.4.2.min.js"></script>
-    <script>
-        if (!window.w2ui) { document.write('<script src="lib/w2ui-1.4.2.min.js"><\/script>'); }
-    </script>
+    <script src="http://w2ui.com/src/w2ui-1.4.2.min.js"></script>
     <script src="//cdn.jsdelivr.net/filesaver.js/0.1/FileSaver.min.js"></script>
     <script>
+        if (!window.jQuery) { document.write('<script src="lib/jquery.min.js"><\/script>'); }
+        if (!window.w2ui) { document.write('<script src="lib/w2ui-1.4.2.min.js"><\/script>'); }
         if (!window.saveAs) { document.write('<script src="lib/FileSaver.min.js"><\/script>'); }
     </script>
 
@@ -46,7 +42,7 @@
                 name: 'layout',
                 padding: 4,
                 panels: [
-                    { type: 'top', size: 75, style: pstyle, hidden: true, content: '<div id="instructions"><ul><li>Click in the open space to add a node, drag from one node to another to add an edge. <kbd>ctrl</kbd>+drag a node to position it. Click a node or an edge to select it.</li><li>When a node is selected: <kbd>delete</kbd> removes it, <kbd>R</kbd> toggles reflexivity (loop). When an edge is selected: <kbd>delete</kbd> removes it, <kbd>L</kbd>, <kbd>R</kbd>, <kbd>B</kbd> change direction.</li><li>Save or upload your own adjacency list!</li></ul></div>' },
+                    { type: 'top', size: 75, style: pstyle, hidden: true, content: '<div id="instructions"><ul><li>Click in the open space to add a node, drag from one node to another to add an edge. <kbd>ctrl</kbd>+drag a node to position it. Click a node or an edge to select it.</li><li>When a node is selected: <kbd>delete</kbd> removes it, <kbd>R</kbd> toggles reflexivity (loop). When an edge is selected: <kbd>delete</kbd> removes it, <kbd>L</kbd>, <kbd>R</kbd>, <kbd>B</kbd> change direction.</li><li>Edit, save or upload your own adjacency list!</li></ul></div>' },
                     { type: 'main', minSize: 480, resizable: true, style: pstyle, content: "<div id='graphContainer' style='width: 100%; height: 100%;'><iframe id='graph' scrolling='no' sandbox='allow-scripts allow-forms allow-same-origin' marginwidth='0' marginheight='0' frameborder='0' src='graph.html'></iframe></div>" },
                     { type: 'right', minSize: 200, size: '30%', resizable: true, style: pstyle, content: "<div style='width: 100%; height: 100%'><iframe id='adjlist' sandbox='allow-scripts allow-forms allow-same-origin' marginwidth='0' xmarginheight='0' frameborder='0' src='adjlist.html'></iframe></div>" },
                 ]
@@ -75,7 +71,6 @@
         })
 
         // initialize textarea window
-        // this should wait AFTER the adjacency list iframe is ready
         // the setTimeout hack makes sure necessary scripts are executed (IE only issue)
         window.onload = function () {
             adjWin = document.getElementById('adjlist').contentWindow;
@@ -94,15 +89,15 @@
             if (window.File && window.FileReader && window.FileList && window.Blob) {
                 var fileUp = fileElem.files[0];
                 if (!fileUp.type.match(/text.*/))
-                    alert("Only text file supported; you may want to add the '.txt' extension");
+                    alert("Only text file supported; you may have to add the '.txt' extension");
                 else if (fileUp.size > 1024)
-                    alert("Sorry your adjacency list is too large...");
+                    alert("Sorry, your adjacency list is too large...");
                 else {
                     var reader = new window.FileReader();
                     reader.onload = function () {
                         var result = adjWin.validate(reader.result);
                         if (result == -1 || result == 0)
-                            alert("Couldn't parse your adjacency list--make sure its syntax looks OK");
+                            alert("Couldn't parse your adjacency list--make sure its syntax looks something like 'nodeX:[nodeY,nodeZ],...");
                         else {
                             var obj;
                             if (result == 2)

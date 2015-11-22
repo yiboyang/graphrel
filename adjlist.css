@@ -5,7 +5,6 @@ body {
 }
 
 
-/* This is our style for the adjacency list form */
 #alBox {
     width: 100%;
     border: 1px solid green;
@@ -16,10 +15,7 @@ body {
     resize: none;
 }
 
-
 #alBox.invalid {
-    /*border-color: #900;*/
     border: 1px solid red;
     outline: none;
-    /*background-color: #FDD;*/
 }

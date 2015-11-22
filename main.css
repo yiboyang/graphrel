@@ -1,17 +1,12 @@
-/* set global font */
 body {
     font: 16px Arial, sans-serif;
 }
 
 iframe {
-    /*width: 960px;
-  height: 500px;*/
     width: 100%;
     height: 100%;
-    /*border: 1px solid #DEDEDE;*/
 }
 
-/* remove ul indent in instructions */
 #instructions ul {
     margin: 0;
     padding: 0;
@@ -21,7 +16,6 @@ iframe {
 #header, #footer {
     text-align: center;
 }
-
 
 #control_buttons input:hover, input.clicked {
     background-color: #DCDCDC;
