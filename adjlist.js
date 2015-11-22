@@ -22,34 +22,46 @@ pattern|^$ means pattern or empty string
 // only allow 1 or 2 digit numbers for now (that is from 0-99)
 var reg = /^(\d{1,2}:(\[(\d{1,2}(,\d{1,2})*)?\],?))+$|^$/
 
-function validate() {
-    if (!reg.test(this.value))
-        this.className = "invalid";
+function validate(listStr) {
+    // status code -1: fatal/syntax error; 0: semantic error; 2: empty string
+    if (!reg.test(listStr))
+        return -1;
     else {
-        if (this.value.trim()) {
+        if (listStr.trim()) {
             try {
-                var obj = eval("({" + this.value + "})"); // use the evil eval b/c JSON.parse fails on '0'
+                var obj = eval("({" + listStr + "})"); // use the evil eval b/c JSON.parse fails on '0'
             } catch (e) {
-                this.className = "invalid";
-                return;
+                return -1;
             }
 
             for (var src in obj) {
                 for (var i = 0; i < obj[src].length; i++) {
                     if (!(obj[src][i] in obj)) { // if target node does not appear in the collection of nodes
-                        this.className = "invalid";
-                        return;
+                        return 0;
                     }
                 }
             }
         }
-        else var obj = []; // else empty string
+        else return 2; // else empty string
+        return obj;
+    }
+}
+
+function validateTextBox() {
+    var result = validate(this.value);
+    if (result == -1 || result == 0) // may add missing nodes to resolve semantic error "smartly"
+        this.className = "invalid";
+    else {
+        var obj; 
+        if (result == 2)
+            obj = [];
+        else
+            obj = result;
 
         this.className = "valid";
         window.parent.graphWin.createFromList(obj);
     }
 }
-
 
 var observe;
 if (window.attachEvent) {
@@ -79,8 +91,8 @@ function init() {
     observe(text, 'drop', delayedResize);
     observe(text, 'keydown', delayedResize);
 
-    observe(text, 'keyup', validate);
-    observe(text, 'change', validate);
+    observe(text, 'keyup', validateTextBox);
+    observe(text, 'change', validateTextBox);
 
     text.focus();
     text.select();
