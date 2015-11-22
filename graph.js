@@ -24,7 +24,7 @@ var svg = d3.select('body')
 var nodes = [
     { id: 0, reflexive: false, x: 50, y: 100 },
     { id: 1, reflexive: true, x: 100, y: 50 },
-    { id: 2, reflexive: false, x: 100, y: 100}
+    { id: 2, reflexive: false, x: 100, y: 100 }
 ],
   lastNodeId = 2,
   links = [
@@ -273,7 +273,7 @@ function mousedown() {
     node.x = point[0];
     node.y = point[1];
     nodes.push(node);
-    updateAdjlistFrame(); 
+    updateAdjlistFrame();
     restart();
 }
 
@@ -460,8 +460,8 @@ function createFromList(obj) {
     var nodesToGo = nodes.slice();
     var linksToGo = links.slice();
     var loopNodesToGo = []; // treat (self-directed) links separately
-    
-    for (var n=0; n<nodes.length; n++)
+
+    for (var n = 0; n < nodes.length; n++)
         if (nodes[n].reflexive)
             loopNodesToGo.push(nodes[n])
 
@@ -522,7 +522,7 @@ function createFromList(obj) {
             // if there's a link between the two
             if (link) {
                 var idxTg = linksToGo.indexOf(link);
-                if (idxTg!=-1)
+                if (idxTg != -1)
                     linksToGo.splice(idxTg, 1); // preserve this edge
             } else {
                 link = { source: source, target: target, left: false, right: false };
@@ -535,7 +535,7 @@ function createFromList(obj) {
     // remove leftover links not present in the new graph
     linksToGo.map(function (l) {
         var idx = links.indexOf(l);
-        if (idx!=-1) // only remove those that are actually in links
+        if (idx != -1) // only remove those that are actually in links
             links.splice(links.indexOf(l), 1);
     });
 

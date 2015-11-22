@@ -13,21 +13,26 @@
     <script>
         if (!window.w2ui) { document.write('<script src="lib/w2ui-1.4.2.min.js"><\/script>'); }
     </script>
+    <script src="//cdn.jsdelivr.net/filesaver.js/0.1/FileSaver.min.js"></script>
+    <script>
+        if (!window.saveAs) { document.write('<script src="lib/FileSaver.min.js"><\/script>'); }
+    </script>
+
 </head>
 <body>
 
     <div id="header">
         <h2>Graphrel</h2>
-        <p>Drag, Click, Copy, Paste...</p>
+        <h3>Create Your Graph</h3>
     </div>
 
-    <div id="control_buttons" style="position:relative; left:2px" >
+    <div id="control_buttons" style="position:relative; left:2px">
         <input type="image" id="howto" title="how to" src="img/howto.png" alt="how to" onclick="w2ui['layout'].toggle('top', window.instant)" />
         <input type="image" id="edit" title="edit" src="img/edit.png" alt="edit" onclick="w2ui['layout'].toggle('right', window.instant)" class="clicked" />
         <input type="image" id="startover" title="start over" src="img/startover.png" alt="edit" onclick="graphWin.clear()" />
-        <input type="file" id="hidden-file-upload" style="display:none" onchange="handleFileUpload(this)" /> 
+        <input type="file" id="hidden-file-upload" style="display:none" onchange="handleFileUpload(this)" />
         <input type="image" id="upload" title="upload adjacency list" src="img/upload.png" alt="upload adjacency list" onclick="triggerUpload()" />
-
+        <input type="image" id="save" title="save adjacency list" src="img/save.png" alt="save adjacency list" onclick="handleSave()" />
     </div>
 
     <div id="layout" style="position: absolute; top: 150px; bottom: 50px; left: 10px; right: 10px;"></div> <!--Use absolute positioning. This allows layout to be auto resized-->
@@ -41,7 +46,7 @@
                 name: 'layout',
                 padding: 4,
                 panels: [
-                    { type: 'top', size: 75, style: pstyle, hidden: true, content: '<div id="instructions"><ul><li>Click in the open space to add a node, drag from one node to another to add an edge. <kbd>ctrl</kbd>-drag a node to position it. Click a node or an edge to select it.</li><li>When a node is selected: <kbd>R</kbd> toggles reflexivity (loop), <kbd>delete</kbd> removes the node. When an edge is selected: <kbd>L</kbd>, <kbd>R</kbd>, <kbd>B</kbd> change direction, <kbd>delete</kbd> removes the edge.</li><li>Edit the adjacency list to see real-time updates. More features coming soon!</li></ul></div>' },
+                    { type: 'top', size: 75, style: pstyle, hidden: true, content: '<div id="instructions"><ul><li>Click in the open space to add a node, drag from one node to another to add an edge. <kbd>ctrl</kbd>+drag a node to position it. Click a node or an edge to select it.</li><li>When a node is selected: <kbd>delete</kbd> removes it, <kbd>R</kbd> toggles reflexivity (loop). When an edge is selected: <kbd>delete</kbd> removes it, <kbd>L</kbd>, <kbd>R</kbd>, <kbd>B</kbd> change direction.</li><li>Save or upload your own adjacency list!</li></ul></div>' },
                     { type: 'main', minSize: 480, resizable: true, style: pstyle, content: "<div id='graphContainer' style='width: 100%; height: 100%;'><iframe id='graph' scrolling='no' sandbox='allow-scripts allow-forms allow-same-origin' marginwidth='0' marginheight='0' frameborder='0' src='graph.html'></iframe></div>" },
                     { type: 'right', minSize: 200, size: '30%', resizable: true, style: pstyle, content: "<div style='width: 100%; height: 100%'><iframe id='adjlist' sandbox='allow-scripts allow-forms allow-same-origin' marginwidth='0' xmarginheight='0' frameborder='0' src='adjlist.html'></iframe></div>" },
                 ]
@@ -72,7 +77,7 @@
         // initialize textarea window
         // this should wait AFTER the adjacency list iframe is ready
         // the setTimeout hack makes sure necessary scripts are executed (IE only issue)
-        $('adjlist').ready(function () {
+        window.onload = function () {
             adjWin = document.getElementById('adjlist').contentWindow;
             (function deferInit() {
                 if (adjWin.init && graphWin.updateAdjlistFrame) {
@@ -83,7 +88,7 @@
                 else
                     setTimeout(function () { deferInit() }, 50);
             })();
-        });
+        }
 
         function handleFileUpload(fileElem) {
             if (window.File && window.FileReader && window.FileList && window.Blob) {
@@ -96,12 +101,10 @@
                     var reader = new window.FileReader();
                     reader.onload = function () {
                         var result = adjWin.validate(reader.result);
-                        console.log(reader.result);
-                        console.log(result);
                         if (result == -1 || result == 0)
                             alert("Couldn't parse your adjacency list--make sure its syntax looks OK");
                         else {
-                            var obj; 
+                            var obj;
                             if (result == 2)
                                 obj = [];
                             else
@@ -116,16 +119,19 @@
                 fileElem.value = ''; // reset file input; otherwise nothing happens if user uploads the same file twice; may break in IE<11
             }
             else
-                alert("Your browser doesn't support File API--try upgrading to IE 10+/Chrome/Firefox");
+                alert("Your browser doesn't support this--try upgrading to IE 10+/Chrome/Firefox");
         }
 
         function triggerUpload() {
             document.getElementById("hidden-file-upload").click();
         }
 
+        function handleSave() {
+            var blob = new Blob([JSON.stringify(graphWin.getAdjlist()).replace(/["'{}]/g, "")], { type: "text/plain" });
+            saveAs(blob, "awesomeGraph.txt");
+        }
 
     </script>
-
 
 </body>
 </html>

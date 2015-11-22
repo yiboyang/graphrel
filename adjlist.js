@@ -52,7 +52,7 @@ function validateTextBox() {
     if (result == -1 || result == 0) // may add missing nodes to resolve semantic error "smartly"
         this.className = "invalid";
     else {
-        var obj; 
+        var obj;
         if (result == 2)
             obj = [];
         else
