@@ -78,6 +78,7 @@ var selected_node = null,
     mousedown_link = null,
     mousedown_node = null,
     mouseup_node = null;
+drag_node = null;
 
 function resetMouseVars() {
     mousedown_node = null;
@@ -107,8 +108,17 @@ function tick() {
     circle.attr('transform', function (d) {
         // update position against border
         if (xbound && ybound) {
+            var prevdx = d.x, prevdy = d.y;
             d.x = Math.max(15, Math.min(xbound - 25, d.x));
             d.y = Math.max(15, Math.min(ybound - 25, d.y));
+            if (prevdx != d.x || prevdy != d.y) {
+                d3.select(this).classed("fixed", d.fixed = false); // set fixed bit to false
+                if (d === drag_node) { // if the node is being dragged outside border, release mouse early to prevent crazy rebounce
+                    var event = document.createEvent("SVGEvents");
+                    event.initEvent("mouseup", true, true);
+                    this.dispatchEvent(event);
+                }
+            }
         }
 
         return 'translate(' + d.x + ',' + d.y + ')';
@@ -174,7 +184,7 @@ function restart() {
           d3.select(this).attr('transform', '');
       })
       .on('mousedown', function (d) {
-          if (d3.event.ctrlKey) return;
+          if (d3.event.ctrlKey) { drag_node = d; return; }
 
           // select node
           mousedown_node = d;
@@ -239,7 +249,8 @@ function restart() {
           selected_node = null;
           updateAdjlistFrame();
           restart();
-      });
+      })
+    .on("dblclick", dblclick);
 
     // show node IDs
     g.append('svg:text')
@@ -320,7 +331,7 @@ function keydown() {
 
     // ctrl, allow dragging
     if (d3.event.keyCode === 17) {
-        circle.call(force.drag);
+        circle.call(drag);
         svg.classed('ctrl', true);
     }
 
@@ -385,6 +396,15 @@ function keyup() {
     }
 }
 
+// specify fixed bit for sticky dragging effect
+var drag = force.drag()
+    .on("dragstart", dragstart);
+function dblclick(d) {
+    d3.select(this).classed("fixed", d.fixed = false);
+}
+function dragstart(d) {
+    d3.select(this).classed("fixed", d.fixed = true);
+}
 
 // return the adjacency list describing current graph relation
 function getAdjlist() {
