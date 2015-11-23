@@ -2,7 +2,6 @@
 // size affects iframe resizing in the main app page
 var width = 500,
     height = 500,
-    aspect = width / height,
     linkDistance = 100,
     xbound, // these bounds will be dynamically set by main page
     ybound,
@@ -86,7 +85,7 @@ function resetMouseVars() {
     mousedown_link = null;
 }
 
-// update force layout (called automatically each iteration), animation callback
+// update force layout (called automatically each iteration)
 function tick() {
     // draw directed edges with proper padding from node centers
     path.attr('d', function (d) {
@@ -126,7 +125,6 @@ function restart() {
       .style('marker-start', function (d) { return d.left ? 'url(#start-arrow)' : ''; })
       .style('marker-end', function (d) { return d.right ? 'url(#end-arrow)' : ''; });
 
-
     // add new links
     path.enter().append('svg:path')
       .attr('class', 'link')
@@ -146,7 +144,6 @@ function restart() {
 
     // remove old links
     path.exit().remove();
-
 
     // circle (node) group
     // NB: the function arg is crucial here! nodes are known by id, not by index!
@@ -405,7 +402,6 @@ function getAdjlist() {
             alist[src].push(tgt);
         if (alist[tgt].indexOf(src) == -1 && lnk.left) // if lnk points from target to source (both ways allowed)
             alist[tgt].push(src);
-
     }
 
     // loop through all nodes to add loops
@@ -425,8 +421,6 @@ function getAdjlist() {
     }
     return alist;
 }
-
-
 
 // handle to the adjacency list editor frame; set in main page once ajdlist frame is ready
 var alBox;

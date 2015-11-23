@@ -4,8 +4,8 @@ body {
     font-weight: bold;
 }
 
-
 #alBox {
+    font-size: 18pt;
     width: 100%;
     border: 1px solid green;
     margin: 0;
@@ -15,7 +15,7 @@ body {
     resize: none;
 }
 
-#alBox.invalid {
-    border: 1px solid red;
-    outline: none;
-}
+    #alBox.invalid {
+        border: 1px solid red;
+        outline: none;
+    }
