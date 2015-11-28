@@ -410,7 +410,7 @@ function dragstart(d) {
 function getAdjlist() {
     var alist = {};
 
-    // loop through all links to add to resulting adjacency list
+    // add all nodes/links
     for (var i = 0; i < links.length; i++) {
         var lnk = links[i];
         var src = lnk.source.id, tgt = lnk.target.id;
@@ -424,7 +424,7 @@ function getAdjlist() {
             alist[tgt].push(src);
     }
 
-    // loop through all nodes to add loops
+    // add all loops
     for (var j = 0; j < nodes.length; j++) {
         var n = nodes[j];
         var nid = nodes[j].id;
@@ -447,25 +447,12 @@ var alBox;
 // updates the adjacency list frame in the main app upon node/link (loop too) creation/deletion
 function updateAdjlistFrame() {
     if (typeof (window.parent.rightPanel) != "undefined" && !window.parent.rightPanel.hidden) {
-        var alistr = JSON.stringify(getAdjlist());
-        alBox.value = alistr.replace(/["'{}]/g, "");
-        // update the display of adjacency list (height/border) the cross-browser way
-        // manually trigger the cut event of textarea for auto adjusting height; no need to validate
-        if (typeof updateDisplay === "undefined") {
-            if (document.createEvent) {
-                updateDisplay = document.createEvent("HTMLEvents");
-                updateDisplay.initEvent("cut", true, true);
-            } else {
-                updateDisplay = document.createEventObject();
-                updateDisplay.eventType = "cut";
-            }
-            updateDisplay.eventName = "cut";
-        }
-        if (document.createEvent)
-            alBox.dispatchEvent(updateDisplay);
-        else
-            alBox.fireEvent("on" + updateDisplay.eventType, updateDisplay);
-        alBox.className = 'valid';
+        setTimeout(function () {
+            alBox.value = JSON.stringify(getAdjlist()).replace(/["'{}]/g, "");
+            alBox.className = 'valid';
+            alBox.style.height = 'auto';
+            alBox.style.height = alBox.scrollHeight + 'px';
+        }, 0);
     }
 }
 
