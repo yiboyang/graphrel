@@ -446,25 +446,27 @@ function getAdjlist() {
 var alBox;
 // updates the adjacency list frame in the main app upon node/link (loop too) creation/deletion
 function updateAdjlistFrame() {
-    var alistr = JSON.stringify(getAdjlist());
-    alBox.value = alistr.replace(/["'{}]/g, "");
-    // update the display of adjacency list (height/border) the cross-browser way
-    // manually trigger the cut event of textarea for auto adjusting height; no need to validate
-    if (typeof updateDisplay === "undefined") {
-        if (document.createEvent) {
-            updateDisplay = document.createEvent("HTMLEvents");
-            updateDisplay.initEvent("cut", true, true);
-        } else {
-            updateDisplay = document.createEventObject();
-            updateDisplay.eventType = "cut";
+    if (typeof (window.parent.rightPanel) != "undefined" && !window.parent.rightPanel.hidden) {
+        var alistr = JSON.stringify(getAdjlist());
+        alBox.value = alistr.replace(/["'{}]/g, "");
+        // update the display of adjacency list (height/border) the cross-browser way
+        // manually trigger the cut event of textarea for auto adjusting height; no need to validate
+        if (typeof updateDisplay === "undefined") {
+            if (document.createEvent) {
+                updateDisplay = document.createEvent("HTMLEvents");
+                updateDisplay.initEvent("cut", true, true);
+            } else {
+                updateDisplay = document.createEventObject();
+                updateDisplay.eventType = "cut";
+            }
+            updateDisplay.eventName = "cut";
         }
-        updateDisplay.eventName = "cut";
+        if (document.createEvent)
+            alBox.dispatchEvent(updateDisplay);
+        else
+            alBox.fireEvent("on" + updateDisplay.eventType, updateDisplay);
+        alBox.className = 'valid';
     }
-    if (document.createEvent)
-        alBox.dispatchEvent(updateDisplay);
-    else
-        alBox.fireEvent("on" + updateDisplay.eventType, updateDisplay);
-    alBox.className = 'valid';
 }
 
 // creates/updates the graph from a given (valid) 'list' object

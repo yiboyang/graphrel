@@ -17,13 +17,15 @@ iframe {
     text-align: center;
 }
 
-#control_buttons input:hover, input.clicked {
-    background-color: #DCDCDC;
-}
-
 #control_buttons input {
     border: 0;
+    width: 30px;
+    height: 30px;
 }
+
+    #control_buttons input:hover, input.clicked {
+        background-color: #DCDCDC;
+    }
 
 kbd {
     padding: .1em .6em;

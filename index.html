@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="main.css" />
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
     <script src="http://w2ui.com/src/w2ui-1.4.2.min.js"></script>
-    <script src="//cdn.jsdelivr.net/filesaver.js/0.1/FileSaver.min.js"></script>
+    <script src="http://cdn.jsdelivr.net/filesaver.js/0.1/FileSaver.min.js"></script>
     <script>
         if (!window.jQuery) { document.write('<script src="lib/jquery.min.js"><\/script>'); }
         if (!window.w2ui) { document.write('<script src="lib/w2ui-1.4.2.min.js"><\/script>'); }
@@ -23,17 +23,18 @@
     </div>
 
     <div id="control_buttons" style="position:relative; left:2px">
-        <input type="image" id="howto" title="how to" src="img/howto.png" alt="how to" onclick="w2ui['layout'].toggle('top', window.instant)" />
-        <input type="image" id="edit" title="edit" src="img/edit.png" alt="edit" onclick="w2ui['layout'].toggle('right', window.instant)" class="clicked" />
-        <input type="image" id="startover" title="start over" src="img/startover.png" alt="edit" onclick="graphWin.clear()" />
+        <!--<input type="image" id="howto" title="left" src="img/info.png" alt="how to" onclick="w2ui['layout'].toggle('left', window.instant)" />-->
+        <input type="image" id="howto" title="how to" src="img/question.png" alt="how to" onclick="w2ui['layout'].toggle('top', window.instant)" />
+        <input type="image" id="edit" title="edit" src="img/pencil.png" alt="edit" onclick="w2ui['layout'].toggle('right', window.instant); graphWin.updateAdjlistFrame()" class="clicked" />
+        <input type="image" id="startover" title="start over" src="img/loop2.png" alt="edit" onclick="graphWin.clear()" />
         <input type="file" id="hidden-file-upload" style="display:none" onchange="handleFileUpload(this)" />
-        <input type="image" id="upload" title="upload adjacency list" src="img/upload.png" alt="upload adjacency list" onclick="triggerUpload()" />
-        <input type="image" id="save" title="save adjacency list" src="img/save.png" alt="save adjacency list" onclick="handleSave()" />
+        <input type="image" id="upload" title="upload adjacency list" src="img/upload2.png" alt="upload adjacency list" onclick="triggerUpload()" />
+        <input type="image" id="save" title="save adjacency list" src="img/download2.png" alt="save adjacency list" onclick="handleSave()" />
     </div>
 
-    <div id="layout" style="position: absolute; top: 150px; bottom: 50px; left: 10px; right: 10px;"></div> <!--Use absolute positioning. This allows layout to be auto resized-->
+    <div id="layout" style="position: absolute; top: 150px; bottom: 45px; left: 10px; right: 10px;"></div> <!--Use absolute positioning. This allows layout to be auto resized-->
 
-    <div id="footer" style="position: absolute; bottom: 10px; left: 10px; right: 10px;"><a href="https://github.com/yiboyang/graphrel" target="_blank">View on GitHub</a></div>
+    <div id="footer" style="position: absolute; bottom: 3px; left: 10px; right: 10px;"><a href="https://github.com/yiboyang/graphrel" target="_blank"><img src="img/github.png"  alt="View on GitHub"></a></div>
 
     <script type="text/javascript">
         $(function () {
@@ -42,9 +43,10 @@
                 name: 'layout',
                 padding: 4,
                 panels: [
-                    { type: 'top', size: 75, style: pstyle, hidden: true, content: '<div id="instructions"><ul><li>Click in the open space to add a node, drag from one node to another to add an edge. <kbd>ctrl</kbd>+drag a node to position it, double click to release it.</li><li>Single click to select node/edge. When a node is selected: <kbd>delete</kbd> removes it, <kbd>R</kbd> toggles loop. When an edge is selected: <kbd>delete</kbd> removes it, <kbd>L</kbd>/<kbd>R</kbd>/<kbd>B</kbd> change direction.</li><li>Edit, save or upload your own adjacency list!</li></ul></div>' },
+                    { type: 'top', size: 75, style: pstyle, hidden: true, content: '<div id="instructions"><ul><li>Click in the open space to add a node, drag from one node to another to add an edge. <kbd>ctrl</kbd>+drag a node to fix its position, double click to release it.</li><li>Single click to select node/edge. When a node is selected: <kbd>delete</kbd> removes it, <kbd>R</kbd> toggles loop. When an edge is selected: <kbd>delete</kbd> removes it, <kbd>L</kbd>/<kbd>R</kbd>/<kbd>B</kbd> change direction.</li><li>Edit, save or upload your own adjacency list!</li></ul></div>' },
                     { type: 'main', minSize: 480, resizable: true, style: pstyle, content: "<div id='graphContainer' style='width: 100%; height: 100%;'><iframe id='graph' scrolling='no' sandbox='allow-scripts allow-forms allow-same-origin' marginwidth='0' marginheight='0' frameborder='0' src='graph.html'></iframe></div>" },
-                    { type: 'right', minSize: 250, size: '30%', resizable: true, style: pstyle, content: "<div style='width: 100%; height: 100%'><iframe id='adjlist' sandbox='allow-scripts allow-forms allow-same-origin' marginwidth='0' xmarginheight='0' frameborder='0' src='adjlist.html'></iframe></div>" },
+                    { type: 'right', minSize: 200, size: '30%', resizable: true, style: pstyle, content: "<div style='width: 100%; height: 100%'><iframe id='adjlist' sandbox='allow-scripts allow-forms allow-same-origin' marginwidth='0' xmarginheight='0' frameborder='0' src='adjlist.html'></iframe></div>" },
+                    /* { type: 'left', size: '10%', resizable: false, style: pstyle, content: "<div style='width: 100%; height: 100%'><iframe id='properties' sandbox='allow-scripts allow-forms allow-same-origin' marginwidth='0' xmarginheight='0' frameborder='0' src='properties.html'></iframe></div>" } */
                 ]
             });
         });
@@ -57,20 +59,21 @@
 
         // this is needed before the graph iframe loads and renders using the x/ybounds
         $('graph').ready(function () {
-            mainPanel = document.getElementById('layout_layout_panel_main');
+            mainPanel = w2ui['layout'].get('main');
+            rightPanel = w2ui['layout'].get('right');
             graphWin = document.getElementById('graph').contentWindow;
             // dynamically reset force layout bounds on resize event completion
             w2ui['layout'].on('resize', function (event) {
                 event.onComplete = function () {
-                    graphWin.xbound = parseInt(mainPanel.style.width, 10);
-                    graphWin.ybound = parseInt(mainPanel.style.height, 10);
+                    graphWin.xbound = mainPanel.width;
+                    graphWin.ybound = mainPanel.height;
                     if (graphWin.force)
                         graphWin.force.start();
                     if (typeof (adjWin) != "undefined" && adjWin.resize)
                         adjWin.resize(); // otherwise text autogenerated by graph can be pushed off screen
                 }
             });
-        })
+        });
 
         // initialize textarea window
         // the setTimeout hack makes sure necessary scripts are executed (IE only issue)
@@ -98,16 +101,11 @@
                     var reader = new window.FileReader();
                     reader.onload = function () {
                         var result = adjWin.validate(reader.result);
-                        if (result == -1 || result == 0)
+                        if (result === -1 || result === 0)
                             alert("Couldn't parse your adjacency list--make sure its syntax looks something like 'nodeX:[nodeY,nodeZ],...");
                         else {
-                            var obj;
-                            if (result == 2)
-                                obj = [];
-                            else
-                                obj = result;
                             this.className = "valid";
-                            graphWin.createFromList(obj);
+                            graphWin.createFromList(result);
                             graphWin.updateAdjlistFrame();
                         }
                     }

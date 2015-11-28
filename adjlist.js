@@ -6,7 +6,8 @@ function validate(listStr) {
     if (!reg.test(listStr))
         return -1;
     else {
-        if (listStr.trim()) {
+        listStr = listStr.trim();
+        if (listStr) { // if not empty  string
             try {
                 var obj = eval("({" + listStr + "})"); // use the evil eval b/c JSON.parse fails on '0'
             } catch (e) {
@@ -21,24 +22,18 @@ function validate(listStr) {
                 }
             }
         }
-        else return 2; // else empty string
+        else var obj = [];
         return obj;
     }
 }
 
 function validateTextBox() {
     var result = validate(this.value);
-    if (result == -1 || result == 0) // may add missing nodes to resolve semantic error "smartly"
+    if (result === -1 || result === 0) // may add missing nodes to resolve semantic error "smartly"
         this.className = "invalid";
     else {
-        var obj;
-        if (result == 2)
-            obj = [];
-        else
-            obj = result;
-
         this.className = "valid";
-        window.parent.graphWin.createFromList(obj);
+        window.parent.graphWin.createFromList(result);
     }
 }
 
