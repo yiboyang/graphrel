@@ -79,7 +79,8 @@
         // the setTimeout hack makes sure necessary scripts are executed (IE only issue)
         window.onload = function () {
             adjWin = document.getElementById('adjlist').contentWindow;
-            (function deferInit() {
+            setTimeout(deferInit, 100);
+            function deferInit() {
                 if (adjWin.init && graphWin.updateAdjlistFrame) {
                     adjWin.init();
                     graphWin.alBox = adjWin.document.getElementById('alBox');
@@ -87,7 +88,7 @@
                 }
                 else
                     setTimeout(function () { deferInit() }, 50);
-            })();
+            };
         }
 
         function handleFileUpload(fileElem) {
