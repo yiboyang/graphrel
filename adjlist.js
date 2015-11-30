@@ -34,6 +34,7 @@ function validateTextBox() {
     else {
         this.className = "valid";
         window.parent.graphWin.createFromList(result);
+        window.parent.graphWin.updatePropFrame();
     }
 }
 

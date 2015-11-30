@@ -1,0 +1,64 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <base target="_blank" />
+    <title>Properties</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .propList {
+            list-style-type: none;
+            list-style-position: inside;
+            margin: 2px;
+            padding-left: 20px;
+            font-weight: normal;
+        }
+
+            .propList li {
+                padding: 2.5px;
+            }
+
+        a {
+            text-decoration: none;
+        }
+
+            a:hover {
+                color: #5B9DD9;
+            }
+    </style>
+
+</head>
+
+<body>
+    <ul style="list-style-type: none; list-style-position: inside; margin: 0; padding: 0; font-weight: bold;">
+        <li>
+            Graph Properties
+            <ul id="gProp" class="propList">
+                <li id="vcount"></li>
+                <li id="ecount"></li>
+                <!--<li id="indegrees"></li>
+                <li id="outdegrees"></li>-->
+                <li id="weakcon"></li>
+                <li id="weakconcomps"></li>
+                <li id="eucirc"></li>
+                <li id="eupath"></li>
+            </ul>
+        </li>
+        <li>
+            Relational Properties
+            <ul id="rProp" class="propList">
+                <li id="reflexive"></li>
+                <li id="irreflexive"></li>
+                <li id="symmetric"></li>
+                <li id="antisymmetric"></li>
+                <li id="transitive"></li>
+            </ul>
+        </li>
+    </ul>
+
+</body>
+
+</html>

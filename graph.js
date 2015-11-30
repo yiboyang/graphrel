@@ -19,16 +19,15 @@ var svg = d3.select('body')
 //  - nodes are known by 'id', not by index in array.
 //  - reflexive edges are indicated on the node (as a bold black circle).
 //  - links are always source < target; edge directions are set by 'left' and 'right'.
+//  - $visited helps with graph traversal
 // specify initial positions of nodes to avoid random (by default) behavior at beginning
 var nodes = [
-    { id: 0, reflexive: false, x: 50, y: 100 },
-    { id: 1, reflexive: true, x: 100, y: 50 },
-    { id: 2, reflexive: false, x: 100, y: 100 }
+    { id: 0, reflexive: false, x: 50, y: 100, visited: false },
+    { id: 1, reflexive: false, x: 100, y: 50, visited: false },
 ],
   lastNodeId = 2,
   links = [
     { source: nodes[0], target: nodes[1], left: false, right: true },
-    { source: nodes[1], target: nodes[2], left: true, right: true }
   ];
 
 // init D3 force layout
@@ -248,6 +247,7 @@ function restart() {
           selected_link = link;
           selected_node = null;
           updateAdjlistFrame();
+          updatePropFrame();
           restart();
       })
     .on("dblclick", dblclick);
@@ -277,11 +277,12 @@ function mousedown() {
 
     // insert new node at point
     var point = d3.mouse(this),
-        node = { id: ++lastNodeId, reflexive: false };
+        node = { id: ++lastNodeId, reflexive: false, visited: false };
     node.x = point[0];
     node.y = point[1];
     nodes.push(node);
     updateAdjlistFrame();
+    updatePropFrame();
     restart();
 }
 
@@ -349,6 +350,7 @@ function keydown() {
             selected_link = null;
             selected_node = null;
             updateAdjlistFrame();
+            updatePropFrame();
             restart();
             break;
         case 66: // B
@@ -358,6 +360,7 @@ function keydown() {
                 selected_link.right = true;
             }
             updateAdjlistFrame();
+            updatePropFrame();
             restart();
             break;
         case 76: // L
@@ -367,6 +370,7 @@ function keydown() {
                 selected_link.right = false;
             }
             updateAdjlistFrame();
+            updatePropFrame();
             restart();
             break;
         case 82: // R
@@ -379,6 +383,7 @@ function keydown() {
                 selected_link.right = true;
             }
             updateAdjlistFrame();
+            updatePropFrame();
             restart();
             break;
     }
@@ -406,22 +411,30 @@ function dragstart(d) {
     d3.select(this).classed("fixed", d.fixed = true);
 }
 
-// return the adjacency list describing current graph relation
-function getAdjlist() {
+// return the adjacency list describing current graph relation, in the form of node0id:[node1ref, node2ref...]
+// the $undirected switch is optional; if provided (conventionally set to 1), produce the adjacency list of 
+//underlying undirected graph instead of default directed graph
+function getAdjlist(undirected) {
     var alist = {};
 
     // add all nodes/links
     for (var i = 0; i < links.length; i++) {
         var lnk = links[i];
-        var src = lnk.source.id, tgt = lnk.target.id;
-        if (!alist.hasOwnProperty(src))
-            alist[src] = [];
-        if (!alist.hasOwnProperty(tgt))
-            alist[tgt] = [];
-        if (alist[src].indexOf(tgt) == -1 && lnk.right) // if src doesn't already have tgt in its list and lnk points from src to tgt
-            alist[src].push(tgt);
-        if (alist[tgt].indexOf(src) == -1 && lnk.left) // if lnk points from target to source (both ways allowed)
-            alist[tgt].push(src);
+        var src = lnk.source, tgt = lnk.target;
+        var srcId = lnk.source.id, tgtId = lnk.target.id;
+        if (!alist.hasOwnProperty(srcId))
+            alist[srcId] = [];
+        if (!alist.hasOwnProperty(tgtId))
+            alist[tgtId] = [];
+        if (typeof undirected != "undefined") {
+            alist[srcId].push(tgt);
+            alist[tgtId].push(src);
+        } else {
+            if (alist[srcId].indexOf(tgt) == -1 && lnk.right) // if src doesn't already have tgt in its list and lnk points from src to tgt
+                alist[srcId].push(tgt);
+            if (alist[tgtId].indexOf(src) == -1 && lnk.left) // if lnk points from target to source (both ways allowed)
+                alist[tgtId].push(src);
+        }
     }
 
     // add all loops
@@ -431,34 +444,48 @@ function getAdjlist() {
         if (!alist.hasOwnProperty(nid))
             alist[nid] = [];
         if (n.reflexive)
-            alist[nid].push(nid);
+            alist[nid].push(n);
     }
 
     // sort the individual arrays
     for (var nd in alist) {
         if (alist.hasOwnProperty(nd))
-            alist[nd].sort();
+            alist[nd].sort(function (a, b) { return a.id - b.id });
     }
+
+    // convert the node references in arrays to conventional id representation
+    alist.toNumList = function () {
+        var numList = {}; // create a copy; no modification on original
+        for (var nd in this)
+            if (nd !== "toNumList" && this.hasOwnProperty(nd)) {
+                numList[nd] = [];
+                for (var x = 0; x < this[nd].length; x++)
+                    numList[nd][x] = this[nd][x].id;
+            }
+        return numList;
+    };
     return alist;
 }
 
-// handle to the adjacency list editor frame; set in main page once ajdlist frame is ready
+// handle for the adjacency list editor frame; set in main page once ajdlist frame is ready
 var alBox;
 // updates the adjacency list frame in the main app upon node/link (loop too) creation/deletion
 function updateAdjlistFrame() {
     if (typeof (window.parent.rightPanel) != "undefined" && !window.parent.rightPanel.hidden) {
+        var alist = getAdjlist();
         setTimeout(function () {
-            alBox.value = JSON.stringify(getAdjlist()).replace(/["'{}]/g, "");
+            alBox.value = JSON.stringify(alist.toNumList()).replace(/["'{}]/g, "");
             alBox.className = 'valid';
             alBox.style.height = 'auto';
             alBox.style.height = alBox.scrollHeight + 'px';
         }, 0);
+        return alist;
     }
 }
 
 // creates/updates the graph from a given (valid) 'list' object
 // called when the adjacency list changes
-function createFromList(obj) {
+function createFromList(list) {
     // create shallow copy containers to hold nodes/links that need to be removed
     var nodesToGo = nodes.slice();
     var linksToGo = links.slice();
@@ -469,7 +496,7 @@ function createFromList(obj) {
             loopNodesToGo.push(nodes[n])
 
     // add nodes if not present
-    for (var src in obj) {
+    for (var src in list) {
         var newNode = true,
             srcId = parseInt(src, 10);
         for (var n = 0; n < nodesToGo.length; n++) {
@@ -480,7 +507,7 @@ function createFromList(obj) {
             }
         }
         if (newNode)
-            nodes.push({ id: srcId, reflexive: false });
+            nodes.push({ id: srcId, reflexive: false, visited: false });
     }
 
     // remove leftover nodes and their associated links
@@ -494,12 +521,12 @@ function createFromList(obj) {
         links[l].left = links[l].right = false;
 
     // now deal with edges/links and loops
-    for (var src in obj) {
-        if (src > lastNodeId) lastNodeId = src; // update lastNodeId to the largest in obj
+    for (var src in list) {
+        if (src > lastNodeId) lastNodeId = src; // update lastNodeId to the largest in list
         var srcId = parseInt(src, 10);
         var srcNode = nodes.filter(function (n) { return n.id == srcId })[0];
-        for (var i = 0; i < obj[src].length; i++) {
-            var tgtId = parseInt(obj[src][i], 10);
+        for (var i = 0; i < list[src].length; i++) {
+            var tgtId = parseInt(list[src][i], 10);
             // if it's a loop
             if (srcId == tgtId) {
                 if (srcNode.reflexive) // if this link (loop) exists
@@ -550,10 +577,129 @@ function createFromList(obj) {
     restart();
 }
 
+var pw;
+function updatePropFrame() {
+    if (typeof (window.parent.leftPanel) != "undefined" && !window.parent.leftPanel.hidden) {
+        vcount = nodes.length,
+        ecount = 0,
+        idx = {}, // the order in which the nodes appear in a row/column of adjacency matrix
+        alist = getAdjlist(), // TODO: make this more efficient by caching the adjlist
+        undalist = getAdjlist(1), // get adjacency list of underlying undirected graph
+        //indegr = [],
+        //outdegr = [],
+        weakconcomps = [],
+        comp = [],
+        adjmatrix = [],
+        reflexive = true,
+        irreflexive = true,
+        symmetric = true,
+        antisymmetric = true,
+        transitive = true;
+
+        for (var n = 0; n < nodes.length; n++) {
+            nodes[n].visited = false;
+            idx[nodes[n].id] = n;
+        }
+
+        function dfs() {
+            for (var v = 0; v < vcount; v++) {
+                if (!nodes[v].visited) {
+                    comp = [];
+                    weakconcomps.push(comp);
+                    dfsFromNode(nodes[v]);
+                }
+            }
+        }
+
+        function dfsFromNode(v) {
+            v.visited = true;
+            comp.push(v);
+            for (var a = 0; a < undalist[v.id].length; a++) {
+                if (!undalist[v.id][a].visited)
+                    dfsFromNode(undalist[v.id][a]);
+            }
+        }
+
+        dfs();
+        // convert node refs in weakconcomps to ids
+        for (var x = 0; x < weakconcomps.length; x++)
+            weakconcomps[x] = weakconcomps[x].map(function (n) { return n.id });
+
+        // initialize adjacency matrix
+        for (var i = 0; i < vcount; i++)
+            adjmatrix[i] = Array.apply(null, Array(vcount)).map(Number.prototype.valueOf, 0);
+        for (var src in alist) {
+            var len = alist[src].length;
+            ecount += len;
+            for (var j = 0; j < len; j++) {
+                adjmatrix[idx[src]][idx[alist[src][j].id]] = 1;
+            }
+        }
+
+        // check main diagonal for reflexivity
+        for (var i = 0; i < vcount; i++) {
+            if (adjmatrix[i][i])
+                irreflexive = false;
+            else
+                reflexive = false;
+        }
+
+        // compare adjmatrix and its transpose for symmetry/antisymmetry
+        for (var i = 0; i < vcount; i++) {
+            for (var j = 0; j < vcount; j++) {
+                var trans = adjmatrix[j][i];
+                if (trans != adjmatrix[i][j])
+                    symmetric = false;
+                else if (trans && adjmatrix[i][j] && i != j)
+                    antisymmetric = false;
+            }
+        }
+
+        // comapre the square of adjmatrix to itself. if entry in square is not in adjmatrix, then not transitive
+        (function () {
+            for (var i = 0; i < vcount; i++) { // for every row
+                for (var j = 0; j < vcount; j++) { // for every column
+                    var sqr = 0;
+                    for (var k = 0; k < vcount; k++) // for every element in a row/column
+                        sqr += adjmatrix[i][k] * adjmatrix[k][j];
+                    if (sqr && !adjmatrix[i][j]) {
+                        transitive = false;
+                        return;
+                    }
+                }
+            }
+        })();
+
+        jQuery("#gProp #vcount").text("vertex count:\t");
+        jQuery("#gProp #vcount").append("<a>" + vcount + "</a>");
+        jQuery("#gProp #ecount").text("edge count:\t");
+        jQuery("#gProp #ecount").append("<a>" + ecount + "</a>");
+        jQuery("#gProp #weakcon").text("");
+        jQuery("#gProp #weakcon").append("<a>" + (weakconcomps.length == 1 ? "weakly connected" : "") + "</a>");
+        jQuery("#gProp #weakconcomps").text("weakly connected components: ");
+        jQuery("#gProp #weakconcomps").append("<a>" + weakconcomps[0] + "</a>");
+        for (var c = 1; c < weakconcomps.length; c++)
+            jQuery("#gProp #weakconcomps").append(" | " + "<a>" + weakconcomps[c] + "</a>");
+
+        // jQuery("#rProp").each(function(index, elem) {jQuery(elem).text("")}); // I need some jQuery-fu
+        jQuery("#rProp #reflexive").text("");
+        jQuery("#rProp #irreflexive").text("");
+        jQuery("#rProp #symmetric").text("");
+        jQuery("#rProp #antisymmetric").text("");
+        jQuery("#rProp #transitive").text("");
+        jQuery("#rProp #reflexive").append("<a href='https://en.wikipedia.org/wiki/Reflexive_relation' >" + (reflexive ? "reflexive" : "") + "</a>");
+        jQuery("#rProp #irreflexive").append("<a href='https://en.wikipedia.org/wiki/Reflexive_relation' >" + (irreflexive ? "irreflexive" : "") + "</a>");
+        jQuery("#rProp #symmetric").append("<a href='https://en.wikipedia.org/wiki/Symmetric_relation' >" + (symmetric ? "symmetric" : "") + "</a>");
+        jQuery("#rProp #antisymmetric").append("<a href='https://en.wikipedia.org/wiki/Asymmetric_relation' >" + (antisymmetric ? "antisymmetric" : "") + "</a>");
+        jQuery("#rProp #transitive").append("<a href='https://en.wikipedia.org/wiki/Transitive_relation' >" + (transitive ? "transitive" : "") + "</a>");
+    }
+}
+
 function clear() {
     createFromList([]);
     restart();
     updateAdjlistFrame();
+    updatePropFrame();
     lastNodeId = -1;
 }
 
