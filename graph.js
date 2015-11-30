@@ -688,9 +688,9 @@ function updatePropFrame() {
         jQuery("#rProp #antisymmetric").text("");
         jQuery("#rProp #transitive").text("");
         jQuery("#rProp #reflexive").append("<a href='https://en.wikipedia.org/wiki/Reflexive_relation' >" + (reflexive ? "reflexive" : "") + "</a>");
-        jQuery("#rProp #irreflexive").append("<a href='https://en.wikipedia.org/wiki/Reflexive_relation' >" + (irreflexive ? "irreflexive" : "") + "</a>");
+        jQuery("#rProp #irreflexive").append("<a href='https://en.wikipedia.org/wiki/Reflexive_relation#irreflexive' >" + (irreflexive ? "irreflexive" : "") + "</a>");
         jQuery("#rProp #symmetric").append("<a href='https://en.wikipedia.org/wiki/Symmetric_relation' >" + (symmetric ? "symmetric" : "") + "</a>");
-        jQuery("#rProp #antisymmetric").append("<a href='https://en.wikipedia.org/wiki/Asymmetric_relation' >" + (antisymmetric ? "antisymmetric" : "") + "</a>");
+        jQuery("#rProp #antisymmetric").append("<a href='https://en.wikipedia.org/wiki/Antisymmetric_relation' >" + (antisymmetric ? "antisymmetric" : "") + "</a>");
         jQuery("#rProp #transitive").append("<a href='https://en.wikipedia.org/wiki/Transitive_relation' >" + (transitive ? "transitive" : "") + "</a>");
     }
 }

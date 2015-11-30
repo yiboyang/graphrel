@@ -1,10 +1,9 @@
 # graphrel
 
-A simple, WYSIWYG relation-based graph editor powered by d3.
+A simple, intuitive graph editor/explorer/analyzer powered by d3.
 
-Not only useful for modeling/analyzing real-world relations, but also serves as a pedagogical tool for anybody 
-learning about graphs.
+Great for learners of graph theory; also useful for modeling/analyzing real-world relations.
 
-Currently supports synchronous graph/adjacency list editing and file IO. More features coming soon.
+Currently supports WYSIWYG editing, file IO via adjacency list, and graph/relational property analysis. More features coming soon.
 
 View latest (possibly unstable) live demo on [project page](https://yiboyang.github.io/graphrel)!
