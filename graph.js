@@ -25,7 +25,7 @@ var nodes = [
     { id: 0, reflexive: false, x: 50, y: 100, visited: false },
     { id: 1, reflexive: false, x: 100, y: 50, visited: false },
 ],
-  lastNodeId = 2,
+  lastNodeId = 1,
   links = [
     { source: nodes[0], target: nodes[1], left: false, right: true },
   ];
