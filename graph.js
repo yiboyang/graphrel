@@ -670,23 +670,16 @@ function updatePropFrame() {
             }
         })();
 
-        jQuery("#gProp #vcount").text("vertex count:\t");
-        jQuery("#gProp #vcount").append("<a>" + vcount + "</a>");
-        jQuery("#gProp #ecount").text("edge count:\t");
-        jQuery("#gProp #ecount").append("<a>" + ecount + "</a>");
-        jQuery("#gProp #weakcon").text("");
-        jQuery("#gProp #weakcon").append("<a>" + (weakconcomps.length == 1 ? "weakly connected" : "") + "</a>");
-        jQuery("#gProp #weakconcomps").text("weakly connected components: ");
-        jQuery("#gProp #weakconcomps").append("<a>" + weakconcomps[0] + "</a>");
-        for (var c = 1; c < weakconcomps.length; c++)
-            jQuery("#gProp #weakconcomps").append(" | " + "<a>" + weakconcomps[c] + "</a>");
+        // clear old values
+        jQuery(".propList").contents().filter("li").text("");
 
-        // jQuery("#rProp").each(function(index, elem) {jQuery(elem).text("")}); // I need some jQuery-fu
-        jQuery("#rProp #reflexive").text("");
-        jQuery("#rProp #irreflexive").text("");
-        jQuery("#rProp #symmetric").text("");
-        jQuery("#rProp #antisymmetric").text("");
-        jQuery("#rProp #transitive").text("");
+        jQuery("#vcount").append("<a>" + "vertex count:\t" + vcount + "</a>");
+        jQuery("#ecount").append("<a>" + "edge count:\t" + ecount + "</a>");
+        jQuery("#weakcon").append("<a>" + (weakconcomps.length == 1 ? "weakly connected" : "") + "</a>");
+        jQuery("#gProp #weakconcomps").append("<a>" + "weakly connected components: " + weakconcomps[0] + "</a>");
+        for (var c = 1; c < weakconcomps.length; c++)
+            jQuery("#weakconcomps").append(" | " + "<a>" + weakconcomps[c] + "</a>");
+
         jQuery("#rProp #reflexive").append("<a href='https://en.wikipedia.org/wiki/Reflexive_relation' >" + (reflexive ? "reflexive" : "") + "</a>");
         jQuery("#rProp #irreflexive").append("<a href='https://en.wikipedia.org/wiki/Reflexive_relation#irreflexive' >" + (irreflexive ? "irreflexive" : "") + "</a>");
         jQuery("#rProp #symmetric").append("<a href='https://en.wikipedia.org/wiki/Symmetric_relation' >" + (symmetric ? "symmetric" : "") + "</a>");
