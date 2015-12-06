@@ -676,15 +676,15 @@ function updatePropFrame() {
         jQuery("#vcount").append("<a>" + "vertex count:\t" + vcount + "</a>");
         jQuery("#ecount").append("<a>" + "edge count:\t" + ecount + "</a>");
         jQuery("#weakcon").append("<a>" + (weakconcomps.length == 1 ? "weakly connected" : "") + "</a>");
-        jQuery("#gProp #weakconcomps").append("<a>" + "weakly connected components: " + weakconcomps[0] + "</a>");
+        jQuery("#weakconcomps").append("<a>" + "weakly connected components: " + weakconcomps[0] + "</a>");
         for (var c = 1; c < weakconcomps.length; c++)
             jQuery("#weakconcomps").append(" | " + "<a>" + weakconcomps[c] + "</a>");
 
-        jQuery("#rProp #reflexive").append("<a href='https://en.wikipedia.org/wiki/Reflexive_relation' >" + (reflexive ? "reflexive" : "") + "</a>");
-        jQuery("#rProp #irreflexive").append("<a href='https://en.wikipedia.org/wiki/Reflexive_relation#irreflexive' >" + (irreflexive ? "irreflexive" : "") + "</a>");
-        jQuery("#rProp #symmetric").append("<a href='https://en.wikipedia.org/wiki/Symmetric_relation' >" + (symmetric ? "symmetric" : "") + "</a>");
-        jQuery("#rProp #antisymmetric").append("<a href='https://en.wikipedia.org/wiki/Antisymmetric_relation' >" + (antisymmetric ? "antisymmetric" : "") + "</a>");
-        jQuery("#rProp #transitive").append("<a href='https://en.wikipedia.org/wiki/Transitive_relation' >" + (transitive ? "transitive" : "") + "</a>");
+        jQuery("#reflexive").append("<a href='https://en.wikipedia.org/wiki/Reflexive_relation' >" + (reflexive ? "reflexive" : "") + "</a>");
+        jQuery("#irreflexive").append("<a href='https://en.wikipedia.org/wiki/Reflexive_relation#irreflexive' >" + (irreflexive ? "irreflexive" : "") + "</a>");
+        jQuery("#symmetric").append("<a href='https://en.wikipedia.org/wiki/Symmetric_relation' >" + (symmetric ? "symmetric" : "") + "</a>");
+        jQuery("#antisymmetric").append("<a href='https://en.wikipedia.org/wiki/Antisymmetric_relation' >" + (antisymmetric ? "antisymmetric" : "") + "</a>");
+        jQuery("#transitive").append("<a href='https://en.wikipedia.org/wiki/Transitive_relation' >" + (transitive ? "transitive" : "") + "</a>");
     }
 }
 
