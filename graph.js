@@ -77,7 +77,7 @@ var selected_node = null,
     mousedown_link = null,
     mousedown_node = null,
     mouseup_node = null;
-drag_node = null;
+    drag_node = null;
 
 function resetMouseVars() {
     mousedown_node = null;
@@ -413,7 +413,7 @@ function dragstart(d) {
 
 // return the adjacency list describing current graph relation, in the form of node0id:[node1ref, node2ref...]
 // the $undirected switch is optional; if provided (conventionally set to 1), produce the adjacency list of 
-//underlying undirected graph instead of default directed graph
+// underlying undirected graph instead of default directed graph
 function getAdjlist(undirected) {
     var alist = {};
 
