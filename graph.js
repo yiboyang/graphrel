@@ -113,7 +113,7 @@ function tick() {
             if (prevdx != d.x || prevdy != d.y) {
                 d3.select(this).classed("fixed", d.fixed = false); // set fixed bit to false
                 if (d === drag_node) { // if the node is being dragged outside border, release mouse early to prevent crazy rebounce
-                    var event = document.createEvent("SVGEvents");
+                    var event = document.createEvent("Event");  // "SVGEvents" would've been the more appropriate event type but IE doesn't like it
                     event.initEvent("mouseup", true, true);
                     this.dispatchEvent(event);
                 }
