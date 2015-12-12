@@ -5,7 +5,11 @@ var width = 500,
     linkDistance = 100,
     xbound, // these bounds will be dynamically set by main page
     ybound,
-    colors = d3.scale.category20();
+    colors = d3.scale.category20(),
+    undoStack = [],
+    redoStack = [],
+    maxStackSize = 20,
+    curAlist;   // current adjacency list (directed)
 
 var svg = d3.select('body')
     .append('svg')
@@ -246,8 +250,7 @@ function restart() {
           // select new link after creation for convenient editing
           selected_link = link;
           selected_node = null;
-          updateAdjlistFrame();
-          updatePropFrame();
+          updateAppStatus();
           restart();
       })
     .on("dblclick", dblclick);
@@ -281,8 +284,7 @@ function mousedown() {
     node.x = point[0];
     node.y = point[1];
     nodes.push(node);
-    updateAdjlistFrame();
-    updatePropFrame();
+    updateAppStatus();
     restart();
 }
 
@@ -349,8 +351,7 @@ function keydown() {
             }
             selected_link = null;
             selected_node = null;
-            updateAdjlistFrame();
-            updatePropFrame();
+            updateAppStatus();
             restart();
             break;
         case 66: // B
@@ -359,8 +360,7 @@ function keydown() {
                 selected_link.left = true;
                 selected_link.right = true;
             }
-            updateAdjlistFrame();
-            updatePropFrame();
+            updateAppStatus();
             restart();
             break;
         case 76: // L
@@ -369,8 +369,7 @@ function keydown() {
                 selected_link.left = true;
                 selected_link.right = false;
             }
-            updateAdjlistFrame();
-            updatePropFrame();
+            updateAppStatus();
             restart();
             break;
         case 82: // R
@@ -382,8 +381,7 @@ function keydown() {
                 selected_link.left = false;
                 selected_link.right = true;
             }
-            updateAdjlistFrame();
-            updatePropFrame();
+            updateAppStatus();
             restart();
             break;
     }
@@ -470,11 +468,14 @@ function getAdjlist(undirected) {
 // handle for the adjacency list editor frame; set in main page once ajdlist frame is ready
 var alBox;
 // updates the adjacency list frame in the main app upon node/link (loop too) creation/deletion
-function updateAdjlistFrame() {
+// if not supplied an adjacency list, will use the graph's current adjacency list (curAlist)
+// assuming valid alist in the form of {0:[],1[0]}
+function updateAdjlistFrame(alist) {
     if (typeof (window.parent.rightPanel) != "undefined" && !window.parent.rightPanel.hidden) {
-        var alist = getAdjlist();
+        if (typeof (alist) == "undefined")
+            var alist = curAlist.toNumList();
         setTimeout(function () {
-            alBox.value = JSON.stringify(alist.toNumList()).replace(/["'{}]/g, "");
+            alBox.value = JSON.stringify(alist).replace(/["'{}]/g, "");
             alBox.className = 'valid';
             alBox.style.height = 'auto';
             alBox.style.height = alBox.scrollHeight + 'px';
@@ -483,13 +484,13 @@ function updateAdjlistFrame() {
     }
 }
 
-// creates/updates the graph from a given (valid) 'list' object
+// creates/updates the graph from a given (valid) 'list' object (e.g. {"0':[],'1':['0','1']})
 // called when the adjacency list changes
 function createFromList(list) {
     // create shallow copy containers to hold nodes/links that need to be removed
     var nodesToGo = nodes.slice();
     var linksToGo = links.slice();
-    var loopNodesToGo = []; // treat (self-directed) links separately
+    var loopNodesToGo = []; // treat loops (self-directed links) separately
 
     for (var n = 0; n < nodes.length; n++)
         if (nodes[n].reflexive)
@@ -529,7 +530,7 @@ function createFromList(list) {
             var tgtId = parseInt(list[src][i], 10);
             // if it's a loop
             if (srcId == tgtId) {
-                if (srcNode.reflexive) // if this link (loop) exists
+                if (srcNode.reflexive) // if this loop exists
                     loopNodesToGo.splice(loopNodesToGo.indexOf(srcNode), 1);
                 else
                     srcNode.reflexive = true;
@@ -574,27 +575,33 @@ function createFromList(list) {
         n.reflexive = false;
     });
 
+    // essentially do the same things here as updateAppStatus(), except update adjlistFrame using given input
+    // rather than current adjacency list
+    if (!(undoing || redoing)) record(curAlist.toNumList());    // DO NOT capture state when called from undo/redo
+    curAlist = getAdjlist();
+    updateAdjlistFrame(list);
+    updatePropFrame();
+
     restart();
 }
 
 var pw;
 function updatePropFrame() {
     if (typeof (window.parent.leftPanel) != "undefined" && !window.parent.leftPanel.hidden) {
-        vcount = nodes.length,
-        ecount = 0,
-        idx = {}, // the order in which the nodes appear in a row/column of adjacency matrix
-        alist = getAdjlist(), // TODO: make this more efficient by caching the adjlist
-        undalist = getAdjlist(1), // get adjacency list of underlying undirected graph
-        //indegr = [],
-        //outdegr = [],
-        weakconcomps = [],
-        comp = [],
-        adjmatrix = [],
-        reflexive = true,
-        irreflexive = true,
-        symmetric = true,
-        antisymmetric = true,
-        transitive = true;
+        var vcount = nodes.length,
+            ecount = 0,
+            idx = {}, // the order in which the nodes appear in a row/column of adjacency matrix
+            undalist = getAdjlist(1), // get adjacency list of underlying undirected graph
+            //indegr = [],
+            //outdegr = [],
+            weakconcomps = [],
+            comp = [],
+            adjmatrix = [],
+            reflexive = true,
+            irreflexive = true,
+            symmetric = true,
+            antisymmetric = true,
+            transitive = true;
 
         for (var n = 0; n < nodes.length; n++) {
             nodes[n].visited = false;
@@ -628,11 +635,11 @@ function updatePropFrame() {
         // initialize adjacency matrix
         for (var i = 0; i < vcount; i++)
             adjmatrix[i] = Array.apply(null, Array(vcount)).map(Number.prototype.valueOf, 0);
-        for (var src in alist) {
-            var len = alist[src].length;
+        for (var src in curAlist) {
+            var len = curAlist[src].length;
             ecount += len;
             for (var j = 0; j < len; j++) {
-                adjmatrix[idx[src]][idx[alist[src][j].id]] = 1;
+                adjmatrix[idx[src]][idx[curAlist[src][j].id]] = 1;
             }
         }
 
@@ -676,7 +683,7 @@ function updatePropFrame() {
         jQuery("#vcount").append("<a>" + "vertex count:\t" + vcount + "</a>");
         jQuery("#ecount").append("<a>" + "edge count:\t" + ecount + "</a>");
         jQuery("#weakcon").append("<a>" + (weakconcomps.length == 1 ? "weakly connected" : "") + "</a>");
-        jQuery("#weakconcomps").append("<a>" + "weakly connected components: " + weakconcomps[0] + "</a>");
+        jQuery("#weakconcomps").append("<a>" + "weakly connected components: </a><a>" + weakconcomps[0] + "</a>");
         for (var c = 1; c < weakconcomps.length; c++)
             jQuery("#weakconcomps").append(" | " + "<a>" + weakconcomps[c] + "</a>");
 
@@ -689,14 +696,61 @@ function updatePropFrame() {
 }
 
 function clear() {
-    createFromList([]);
-    restart();
-    updateAdjlistFrame();
-    updatePropFrame();
+    createFromList('');
     lastNodeId = -1;
 }
 
+var undoBtn = window.parent.document.getElementById('undo'), redoBtn = window.parent.document.getElementById('redo');
+var undoing = false, redoing = false;
+function updateBtns() {
+    if (undoStack.length) undoBtn.className = "";
+    else undoBtn.className = "clicked";
+    if (redoStack.length) redoBtn.className = "";
+    else redoBtn.className = "clicked";
+}
+
+// before a change occurs, record the current state, store it onto undo stack
+function record(state) {
+    redoStack.length = 0;   // empty redo stack
+    if (undoStack.length > maxStackSize) undoStack.shift();
+    undoStack.push(state);
+    updateBtns();
+}
+
+function undo() {
+    undoing = true;
+    if (undoStack.length > 0) {
+        var prev = undoStack.pop();
+        redoStack.push(curAlist.toNumList());
+        createFromList(prev);
+    }
+    updateBtns();
+    undoing = false;
+}
+
+function redo() {
+    redoing = true;
+    if (redoStack.length > 0) {
+        var next = redoStack.pop();
+        undoStack.push(curAlist.toNumList());
+        createFromList(next);
+    }
+    updateBtns();
+    redoing = false;
+}
+
+// called when change occurs; record the last used adjacency list for undoing and update adjlist/properties frames
+// only exception is createFromList, which does slightly different things
+function updateAppStatus() {
+    record(curAlist.toNumList());
+    curAlist = getAdjlist();
+    updateAdjlistFrame();
+    updatePropFrame();
+}
+
+
 // app starts here
+curAlist = getAdjlist();
 svg.on('mousedown', mousedown)
   .on('mousemove', mousemove)
   .on('mouseup', mouseup);

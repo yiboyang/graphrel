@@ -73,6 +73,8 @@
         <input type="image" id="howto" title="how to" src="img/question.png" alt="how to" onclick="w2ui['layout'].toggle('top', window.instant)" />
         <input type="image" id="info" title="graph/relational properties" src="img/info.png" alt="graph/relational properties" onclick="w2ui['layout'].toggle('left', window.instant); graphWin.updatePropFrame()" class="clicked" />
         <input type="image" id="edit" title="edit" src="img/pencil.png" alt="edit" onclick="w2ui['layout'].toggle('right', window.instant); graphWin.updateAdjlistFrame()" class="clicked" />
+        <input type="image" id="undo" title="undo" src="img/undo.png" alt="undo" onclick="graphWin.undo()" class="clicked" />
+        <input type="image" id="redo" title="redo" src="img/redo.png" alt="redo" onclick="graphWin.redo()" class="clicked" />
         <input type="image" id="startover" title="start over" src="img/loop2.png" alt="edit" onclick="graphWin.clear()" />
         <input type="file" id="hidden-file-upload" style="display:none" onchange="handleFileUpload(this)" />
         <input type="image" id="upload" title="upload adjacency list" src="img/upload2.png" alt="upload adjacency list" onclick="triggerUpload()" />
@@ -160,8 +162,6 @@
                         else {
                             this.className = "valid";
                             graphWin.createFromList(result);
-                            graphWin.updateAdjlistFrame();
-                            graphWin.updatePropFrame();
                         }
                     }
                     reader.readAsText(fileUp);
@@ -177,7 +177,7 @@
         }
 
         function handleSave() {
-            var blob = new Blob([JSON.stringify(graphWin.updateAdjlistFrame().toNumList()).replace(/["'{}]/g, "")], { type: "text/plain" });
+            var blob = new Blob([JSON.stringify(graphWin.curAlist.toNumList()).replace(/["'{}]/g, "")], { type: "text/plain" });
             saveAs(blob, "awesomeGraph.txt");
         }
 
