@@ -567,7 +567,7 @@ function createFromList(list) {
     linksToGo.map(function (l) {
         var idx = links.indexOf(l);
         if (idx != -1) // only remove those that are actually in links
-            links.splice(links.indexOf(l), 1);
+            links.splice(idx, 1);
     });
 
     // disable the loops that need removed
@@ -667,7 +667,7 @@ function updatePropFrame() {
             for (var i = 0; i < vcount; i++) { // for every row
                 for (var j = 0; j < vcount; j++) { // for every column
                     var sqr = 0;
-                    for (var k = 0; k < vcount; k++) // for every element in a row/column
+                    for (var k = 0; k < vcount; k++) // calculate dot product
                         sqr += adjmatrix[i][k] * adjmatrix[k][j];
                     if (sqr && !adjmatrix[i][j]) {
                         transitive = false;
