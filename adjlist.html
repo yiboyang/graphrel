@@ -42,10 +42,10 @@
 
         function validate(listStr) {
             // status code -1: fatal/syntax error; 0: semantic error; 2: empty string
+            listStr = listStr.trim();
             if (!reg.test(listStr))
                 return -1;
             else {
-                listStr = listStr.trim();
                 if (listStr) { // if not empty  string
                     try {
                         var obj = eval("({" + listStr + "})"); // use the evil eval b/c JSON.parse fails on '0'
